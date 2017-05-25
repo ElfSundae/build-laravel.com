@@ -18,9 +18,10 @@ for version in 5.0 5.1 5.2 5.3 5.4 master; do
     fi
 done
 
+rm -rf vendor
 composer install
 
-# rm -rf node_modules
+rm -rf node_modules
 npm install
 gulp --production
 
