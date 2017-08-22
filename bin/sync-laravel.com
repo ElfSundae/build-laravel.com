@@ -26,7 +26,7 @@ for version in 5.0 5.1 5.2 5.3 5.4 5.5 master; do
 done
 
 rm -rf node_modules
-npm install
+npm install &>/dev/null
 gulp --production
 
 docs=$(cat build/docs.sh)
