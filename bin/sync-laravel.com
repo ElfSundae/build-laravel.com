@@ -9,9 +9,10 @@ if ! [[ -d "$root" ]]; then
 fi
 
 cd "$root"
+git reset --hard
 git pull origin master
 
-rm -rf vendor
+# rm -rf vendor
 composer install
 
 if ! [[ -f ".env" ]]; then
@@ -19,13 +20,13 @@ if ! [[ -f ".env" ]]; then
     php artisan key:generate
 fi
 
-for version in 5.0 5.1 5.2 5.3 5.4 5.5 master; do
+for version in 4.2 5.0 5.1 5.2 5.3 5.4 5.5 master; do
     if ! [[ -d "resources/docs/$version" ]]; then
         git clone git@github.com:laravel/docs.git --single-branch --branch=$version --verbose resources/docs/$version
     fi
 done
 
-rm -rf node_modules
+# rm -rf node_modules
 npm install &>/dev/null
 gulp --production
 
