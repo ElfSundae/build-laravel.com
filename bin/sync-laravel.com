@@ -102,7 +102,6 @@ build_api()
     replace="\"$ROOT\""
     api=${api//$find/$replace}
     eval "$api"
-    exit_if_error
 
     git checkout composer.json composer.lock
 }
