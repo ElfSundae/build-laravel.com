@@ -6,7 +6,7 @@ usage()
 {
     script=$(basename $0)
     cat <<EOT
-Sync laravel.com website.
+Sync local mirror of https://laravel.com
 
 Usage: $script [<webroot>] [<options>]
 
@@ -73,7 +73,7 @@ build_docs()
 
     for version in 4.2 5.0 5.1 5.2 5.3 5.4 5.5 master; do
         if ! [[ -d "resources/docs/$version" ]]; then
-            git clone git://github.com/laravel/docs.git --single-branch --branch=$version --verbose resources/docs/$version -q
+            git clone git://github.com/laravel/docs.git --single-branch --branch=$version resources/docs/$version -q
         fi
     done
 
