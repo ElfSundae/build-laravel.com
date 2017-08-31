@@ -113,7 +113,8 @@ SKIP_API=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -h|--help)
-            usage; exit 0
+            usage
+            exit 0
             ;;
         -c|--clean)
             CLEAN_REPO=1
