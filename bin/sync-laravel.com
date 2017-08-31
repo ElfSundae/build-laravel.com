@@ -128,7 +128,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         *)
-            ROOT=$1
+            ROOT=${1%/}
             shift
             ;;
     esac
