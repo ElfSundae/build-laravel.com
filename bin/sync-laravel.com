@@ -93,7 +93,6 @@ build_api()
     rm -rf vendor
     rm -rf composer.lock
     composer require sami/sami:dev-master -q
-    git checkout composer.json composer.lock
     exit_if_error
 
     cd "$ROOT"
@@ -104,6 +103,8 @@ build_api()
     api=${api//$find/$replace}
     eval "$api"
     exit_if_error
+
+    git checkout composer.json composer.lock
 }
 
 CLEAN_REPO=0
