@@ -46,7 +46,7 @@ update_app()
 {
     cd "$ROOT"
 
-    echo "composer install ..."
+    echo "composer install..."
     # rm -rf vendor
     composer install -q
     if ! [[ -f ".env" ]]; then
@@ -55,19 +55,19 @@ update_app()
     fi
     exit_if_error
 
-    echo "npm install ..."
+    echo "npm install..."
     # rm -rf node_modules
     npm install &>/dev/null
     exit_if_error
 
-    echo "gulp --production ..."
-    gulp --production
+    echo "gulp --production..."
+    gulp --production &>/dev/null
     exit_if_error
 }
 
 build_docs()
 {
-    echo "Updating docs ..."
+    echo "Updating docs..."
 
     cd "$ROOT"
 
@@ -87,7 +87,7 @@ build_docs()
 
 build_api()
 {
-    echo "Building APIs ..."
+    echo "Building API..."
 
     cd "$ROOT/build/sami"
     rm -rf vendor
