@@ -1,51 +1,136 @@
 #!/bin/sh
 
-## Sync laravel.com website.
+ROOT=$(pwd)"/laravel.com"
 
-root=/data/www/laravel.com
+usage()
+{
+    script=$(basename $0)
+    cat <<EOT
+Sync laravel.com website.
 
-if ! [[ -d "$root" ]]; then
-    git clone git@github.com:laravel/laravel.com.git "$root"
-fi
+Usage: $script [<webroot>] [<options>]
 
-cd "$root"
-git reset --hard
-git pull origin master
+Options:
+    --skip-docs     Skip building Laravel docs
+    --skip-api      Skip building Laravel api
+    -c|--clean      Clean webroot
+    -h|--help       Show this help
+EOT
+}
 
-# rm -rf vendor
-composer install
+exit_if_error()
+{
+    [ $? -eq 0 ] || exit $?
+}
 
-if ! [[ -f ".env" ]]; then
-    echo "APP_KEY=" > .env
-    php artisan key:generate
-fi
-
-for version in 4.2 5.0 5.1 5.2 5.3 5.4 5.5 master; do
-    if ! [[ -d "resources/docs/$version" ]]; then
-        git clone git@github.com:laravel/docs.git --single-branch --branch=$version --verbose resources/docs/$version
+update_repo()
+{
+    if ! [[ -d "$ROOT" ]]; then
+        git clone git://github.com/laravel/laravel.com.git "$ROOT"
+    else
+        git -C "$ROOT" reset --hard
+        git -C "$ROOT" pull origin master
     fi
+
+    exit_if_error
+}
+
+clean_repo()
+{
+    if [[ -d "$ROOT" ]]; then
+        git -C "$ROOT" clean -dfx
+    fi
+}
+
+update_app()
+{
+    cd "$ROOT"
+
+    rm -rf vendor
+    composer install -q
+    if ! [[ -f ".env" ]]; then
+        echo "APP_KEY=" > .env
+        php artisan key:generate
+    fi
+    exit_if_error
+
+    rm -rf node_modules
+    npm install &>/dev/null
+    exit_if_error
+
+    gulp --production
+    exit_if_error
+}
+
+build_docs()
+{
+    cd "$ROOT"
+
+    for version in 4.2 5.0 5.1 5.2 5.3 5.4 5.5 master; do
+        if ! [[ -d "resources/docs/$version" ]]; then
+            git clone git://github.com/laravel/docs.git --single-branch --branch=$version --verbose resources/docs/$version
+        fi
+    done
+
+    docs=$(cat build/docs.sh)
+    find="/home/forge/laravel.com"
+    replace="\"$ROOT\""
+    docs=${docs//$find/$replace}
+    eval "$docs"
+    exit_if_error
+}
+
+build_api()
+{
+    cd "$ROOT/build/sami"
+    rm -rf vendor
+    composer require sami/sami:dev-master -q
+    exit_if_error
+
+    cd "$ROOT"
+
+    api=$(cat build/api.sh)
+    find="/home/forge/laravel.com"
+    replace="\"$ROOT\""
+    api=${api//$find/$replace}
+    eval "$api"
+    exit_if_error
+}
+
+CLEAN_REPO=0
+SKIP_DOCS=0
+SKIP_API=0
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -h|--help)
+            usage; exit 0
+            ;;
+        -c|--clean)
+            CLEAN_REPO=1
+            shift
+            ;;
+        --skip-docs)
+            SKIP_DOCS=1
+            shift
+            ;;
+        --skip-api)
+            SKIP_API=1
+            shift
+            ;;
+        *)
+            ROOT=$1
+            shift
+            ;;
+    esac
 done
 
-# rm -rf node_modules
-npm install &>/dev/null
-gulp --production
+if [[ $CLEAN_REPO != 0 ]]; then
+    clean_repo
+    exit 0;
+fi
 
-docs=$(cat build/docs.sh)
-docs=${docs//home\/forge/data\/www}
-eval "$docs"
-cd "$root"
+update_repo
+update_app
 
-composer global require sami/sami:dev-master
-
-old_sami_content=$(cat build/sami/sami.php)
-new_sami_content=${old_sami_content/require __DIR__/require \'$HOME\/.composer\'}
-echo "$new_sami_content" > build/sami/sami.php
-api=$(cat build/api.sh)
-api=${api//home\/forge/data\/www}
-api=${api//\${sami\}\/vendor\/bin\/sami.php/php $HOME\/.composer\/vendor\/bin\/sami.php}
-eval "$api"
-cd "$root"
-
-echo "$old_sami_content" > build/sami/sami.php
-
-git reset --hard
+[ $SKIP_DOCS == 0 ] && build_docs
+[ $SKIP_API == 0 ] && build_api
