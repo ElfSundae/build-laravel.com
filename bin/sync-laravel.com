@@ -46,7 +46,8 @@ update_app()
 {
     cd "$ROOT"
 
-    rm -rf vendor
+    echo "composer install ..."
+    # rm -rf vendor
     composer install -q
     if ! [[ -f ".env" ]]; then
         echo "APP_KEY=" > .env
@@ -54,21 +55,25 @@ update_app()
     fi
     exit_if_error
 
-    rm -rf node_modules
+    echo "npm install ..."
+    # rm -rf node_modules
     npm install &>/dev/null
     exit_if_error
 
+    echo "gulp --production ..."
     gulp --production
     exit_if_error
 }
 
 build_docs()
 {
+    echo "Updating docs ..."
+
     cd "$ROOT"
 
     for version in 4.2 5.0 5.1 5.2 5.3 5.4 5.5 master; do
         if ! [[ -d "resources/docs/$version" ]]; then
-            git clone git://github.com/laravel/docs.git --single-branch --branch=$version --verbose resources/docs/$version
+            git clone git://github.com/laravel/docs.git --single-branch --branch=$version --verbose resources/docs/$version -q
         fi
     done
 
@@ -82,9 +87,13 @@ build_docs()
 
 build_api()
 {
+    echo "Building APIs ..."
+
     cd "$ROOT/build/sami"
     rm -rf vendor
+    rm -rf composer.lock
     composer require sami/sami:dev-master -q
+    git checkout composer.json composer.lock
     exit_if_error
 
     cd "$ROOT"
@@ -132,5 +141,5 @@ fi
 update_repo
 update_app
 
-[ $SKIP_DOCS == 0 ] && build_docs
-[ $SKIP_API == 0 ] && build_api
+[[ $SKIP_DOCS == 0 ]] && build_docs
+[[ $SKIP_API == 0 ]] && build_api
