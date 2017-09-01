@@ -11,10 +11,11 @@ Sync local mirror of https://laravel.com
 Usage: $script [<webroot>] [<options>]
 
 Options:
+    --status        Check status
     --skip-docs     Skip building Laravel docs
     --skip-api      Skip building Laravel api
-    -c|--clean      Clean webroot
-    -h|--help       Show this help
+    -c, --clean     Clean webroot
+    -h, --help      Show this help
 EOT
 }
 
@@ -40,6 +41,34 @@ clean_repo()
     if [[ -d "$ROOT" ]]; then
         git -C "$ROOT" clean -dfx
     fi
+}
+
+check_git_status()
+{
+    cd "$1"
+    echo "=> $1"
+    git fetch
+    headRev=$(git rev-parse --short HEAD)
+    remoteRev=$(git rev-parse --short @{u})
+    if [[ $headRev == $remoteRev ]]; then
+        echo "Already up-to-date."
+    else
+        echo "[$headRev..$remoteRev]"
+    fi
+}
+
+check_status()
+{
+    if ! [[ -d "$ROOT" ]]; then
+        echo "$ROOT does not exist."
+        exit 1
+    fi
+
+    check_git_status "$ROOT"
+
+    for version in 4.2 5.0 5.1 5.2 5.3 5.4 5.5 master; do
+        check_git_status "$ROOT/resources/docs/$version"
+    done
 }
 
 update_app()
@@ -106,17 +135,14 @@ build_api()
     git checkout composer.json composer.lock
 }
 
+CHECK_STATUS=0
 CLEAN_REPO=0
 SKIP_DOCS=0
 SKIP_API=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        -h|--help)
-            usage
-            exit 0
-            ;;
-        -c|--clean)
-            CLEAN_REPO=1
+        --status)
+            CHECK_STATUS=1
             shift
             ;;
         --skip-docs)
@@ -127,6 +153,14 @@ while [[ $# -gt 0 ]]; do
             SKIP_API=1
             shift
             ;;
+        -c|--clean)
+            CLEAN_REPO=1
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
         *)
             ROOT=${1%/}
             shift
@@ -134,9 +168,14 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+if [[ $CHECK_STATUS != 0 ]]; then
+    check_status
+    exit 0
+fi
+
 if [[ $CLEAN_REPO != 0 ]]; then
     clean_repo
-    exit 0;
+    exit 0
 fi
 
 update_repo
