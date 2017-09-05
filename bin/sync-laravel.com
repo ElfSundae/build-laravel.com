@@ -135,7 +135,7 @@ build_api()
     git checkout composer.json composer.lock
 }
 
-while [[ $# -gt 0 ]]; do
+while [[ $# > 0 ]]; do
     case "$1" in
         --status)
             CHECK_STATUS=1
