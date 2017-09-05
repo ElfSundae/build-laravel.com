@@ -14,7 +14,7 @@ Options:
     --status        Check status
     --skip-docs     Skip building Laravel docs
     --skip-api      Skip building Laravel api
-    -c, --clean     Clean webroot
+    --clean         Clean webroot
     -h, --help      Show this help
 EOT
 }
@@ -137,10 +137,6 @@ build_api()
     git checkout composer.json composer.lock
 }
 
-CHECK_STATUS=0
-CLEAN_REPO=0
-SKIP_DOCS=0
-SKIP_API=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --status)
@@ -155,7 +151,7 @@ while [[ $# -gt 0 ]]; do
             SKIP_API=1
             shift
             ;;
-        -c|--clean)
+        --clean)
             CLEAN_REPO=1
             shift
             ;;
@@ -170,12 +166,12 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ $CHECK_STATUS != 0 ]]; then
+if [[ -n $CHECK_STATUS ]]; then
     check_status
     exit 0
 fi
 
-if [[ $CLEAN_REPO != 0 ]]; then
+if [[ -n $CLEAN_REPO ]]; then
     clean_repo
     exit 0
 fi
@@ -183,5 +179,5 @@ fi
 update_repo
 update_app
 
-[[ $SKIP_DOCS == 0 ]] && build_docs
-[[ $SKIP_API == 0 ]] && build_api
+[[ -z $SKIP_DOCS ]] && build_docs
+[[ -z $SKIP_API ]] && build_api
