@@ -1,14 +1,12 @@
 #!/bin/sh
 
-ROOT=$(pwd)"/laravel.com"
-
 usage()
 {
     script=$(basename $0)
     cat <<EOT
 Sync local mirror of https://laravel.com
 
-Usage: $script [<webroot>] [<options>]
+Usage: $script <webroot> [<options>]
 
 Options:
     --status        Check status
@@ -165,6 +163,12 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+if [[ -z "$ROOT" ]]; then
+    echo "Missing argument: webroot path"
+    echo "Use -h to see usage"
+    exit 1
+fi
 
 if [[ -n $CHECK_STATUS ]]; then
     check_status
