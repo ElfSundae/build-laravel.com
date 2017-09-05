@@ -48,12 +48,14 @@ check_git_status()
     cd "$1"
     echo "=> $1"
     git fetch
+    exit_if_error
+
     headRev=$(git rev-parse --short HEAD)
     remoteRev=$(git rev-parse --short @{u})
     if [[ $headRev == $remoteRev ]]; then
         echo "Already up-to-date."
     else
-        echo "[$headRev..$remoteRev]"
+        echo "[$headRev...$remoteRev]"
     fi
 }
 
