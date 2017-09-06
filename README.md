@@ -37,6 +37,39 @@ Options:
     -h, --help      Show this help
 ```
 
+## Example Nginx Server Configuration
+
+```nginx
+server {
+    listen      80;
+    server_name laravel.com www.laravel.com;
+    return      301 https://laravel.com$request_uri;
+}
+
+server {
+    listen      443 ssl http2;
+    server_name laravel.com;
+    root        /data/www/laravel.com/public;
+    add_header  Strict-Transport-Security "max-age=31536000" always;
+
+    rewrite ^/((?!api).+)/$ /$1 permanent;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass    127.0.0.1:9000;
+        fastcgi_index   index.php;
+        fastcgi_param   SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+        include         fastcgi_params;
+    }
+
+    ssl_certificate     /usr/local/etc/nginx/certs/server.crt;
+    ssl_certificate_key /usr/local/etc/nginx/certs/server.key;
+}
+```
+
 ## License
 
 The MIT License.
