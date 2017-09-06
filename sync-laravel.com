@@ -122,6 +122,9 @@ build_api()
 {
     echo "Building API..."
 
+    # Fix Sami failure: always use the master code because dev-master
+    # from Packagist may not be the newest.
+    # https://github.com/FriendsOfPHP/Sami/issues/294
     cd "$ROOT/build/sami"
     rm -rf vendor
     rm -rf composer.lock
