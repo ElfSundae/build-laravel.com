@@ -4,7 +4,7 @@ usage()
 {
     script=$(basename $0)
     cat <<EOT
-Sync local mirror of https://laravel.com
+Sync local mirror of laravel.com website. v1.0.0
 
 Usage: $script <webroot> [<options>]
 
