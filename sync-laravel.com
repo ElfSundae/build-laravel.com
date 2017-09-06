@@ -134,11 +134,17 @@ build_api()
 
     cd "$ROOT"
 
+    # Create "public/api" directory to make `cp -r build/sami/build/* public/api`
+    # in `api.sh` work.
+    rm -rf public/api
+    mkdir public/api
+
     api=$(cat build/api.sh)
     find="/home/forge/laravel.com"
     replace="\"$ROOT\""
     api=${api//$find/$replace}
     eval "$api"
+    exit_if_error
 
     git checkout composer.json composer.lock
 }
