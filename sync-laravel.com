@@ -199,3 +199,5 @@ update_app
 
 [[ -z $SKIP_DOCS ]] && build_docs
 [[ -z $SKIP_API ]] && build_api
+
+echo "Completed successfully!"
