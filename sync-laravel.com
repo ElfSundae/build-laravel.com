@@ -32,6 +32,10 @@ update_repo()
     fi
 
     exit_if_error
+
+    pushd "$ROOT" > /dev/null
+    ROOT=`pwd -P`
+    popd > /dev/null
 }
 
 clean_repo()
