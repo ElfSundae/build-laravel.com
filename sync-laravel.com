@@ -90,11 +90,11 @@ update_app()
 
     echo "npm install..."
     # rm -rf node_modules
-    npm install
+    npm install &>/dev/null
     exit_if_error
 
     echo "gulp --production..."
-    gulp --production
+    gulp --production &>/dev/null
     exit_if_error
 }
 
