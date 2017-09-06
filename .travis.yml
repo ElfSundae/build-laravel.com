@@ -1,4 +1,4 @@
 language: bash
 
 script:
-    - bash sync-laravel.com
+    - bash sync-laravel.com laravel.com
