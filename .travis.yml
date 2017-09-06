@@ -1,4 +1,15 @@
-language: bash
+language: php
+
+php:
+  - 7.0
+
+before_script:
+  - composer self-update
+  - npm install -g gulp-cli
 
 script:
-    - bash sync-laravel.com laravel.com
+  - bash sync-laravel.com laravel.com
+
+os:
+  - linux
+  - osx
