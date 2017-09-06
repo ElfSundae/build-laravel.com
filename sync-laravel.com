@@ -4,7 +4,7 @@ usage()
 {
     script=$(basename $0)
     cat <<EOT
-Sync local mirror of laravel.com website. v1.0.0
+Sync local mirror of laravel.com website. v1.1
 
 Usage: $script <webroot> [<options>]
 
@@ -121,6 +121,7 @@ build_api()
     cd "$ROOT/build/sami"
     rm -rf vendor
     rm -rf composer.lock
+    composer config repositories.sami '{"type":"vcs","url":"https://github.com/FriendsOfPHP/Sami","no-api":true}'
     composer require sami/sami:dev-master -q
     exit_if_error
 
