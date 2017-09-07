@@ -10,11 +10,12 @@ before_script:
 script:
   - bash sync-laravel.com -h
   - bash sync-laravel.com laravel.com
-  - bash sync-laravel.com laravel.com upgrade
   - bash sync-laravel.com laravel.com status
   - bash sync-laravel.com laravel.com skip-docs
   - bash sync-laravel.com laravel.com skip-api
+  - bash sync-laravel.com laravel.com skip-docs skip-api --gaid=UA-123456-7
   - bash sync-laravel.com laravel.com clean
+  - bash sync-laravel.com upgrade
 
 os:
   - linux
