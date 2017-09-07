@@ -17,6 +17,7 @@ Options:
     skip-docs       Skip building docs
     skip-api        Skip building api documentation
     clean           Clean webroot
+    --gaid          Set Google Analytics tracking ID, e.g. UA-123456-7
     -v, --version   Print version of this script
     -h, --help      Show this help
 EOT
@@ -53,10 +54,16 @@ update_repo()
         git -C "$ROOT" reset --hard
         git -C "$ROOT" pull origin master
     fi
-
     exit_if_error
 
     ROOT=$(fullpath "$ROOT")
+
+    if [[ -n $GAID ]]; then
+        appView="$ROOT/resources/views/app.blade.php"
+        content=$(cat "$appView")
+        content=${content//UA-23865777-1/$GAID}
+        echo "$content" > "$appView"
+    fi
 }
 
 clean_repo()
@@ -200,6 +207,10 @@ while [[ $# > 0 ]]; do
             ;;
         clean)
             CLEAN_REPO=1
+            shift
+            ;;
+        --gaid=*)
+            GAID=`echo $1 | sed -e 's/^[^=]*=//g'`
             shift
             ;;
         -v|--version)
