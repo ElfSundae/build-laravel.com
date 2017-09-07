@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="v1.2 - https://github.com/ElfSundae/sync-laravel.com"
+VER="v1.3 - https://github.com/ElfSundae/sync-laravel.com"
 
 usage()
 {
@@ -17,6 +17,7 @@ Options:
     skip-docs       Skip building docs
     skip-api        Skip building api documentation
     clean           Clean webroot
+    --gaid          Set Google Analytics tracking ID, e.g. UA-123456-7
     -v, --version   Print version of this script
     -h, --help      Show this help
 EOT
@@ -53,10 +54,16 @@ update_repo()
         git -C "$ROOT" reset --hard
         git -C "$ROOT" pull origin master
     fi
-
     exit_if_error
 
     ROOT=$(fullpath "$ROOT")
+
+    if [[ -n $GAID ]]; then
+        appView="$ROOT/resources/views/app.blade.php"
+        content=$(cat "$appView")
+        content=${content//UA-23865777-1/$GAID}
+        echo "$content" > "$appView"
+    fi
 }
 
 clean_repo()
@@ -133,9 +140,9 @@ build_docs()
     done
 
     docs=$(cat build/docs.sh)
-    find="/home/forge/laravel.com"
-    replace="\"$ROOT\""
-    docs=${docs//$find/$replace}
+    from="/home/forge/laravel.com"
+    to="\"$ROOT\""
+    docs=${docs//$from/$to}
     eval "$docs"
     exit_if_error
 }
@@ -162,9 +169,9 @@ build_api()
     mkdir public/api
 
     api=$(cat build/api.sh)
-    find="/home/forge/laravel.com"
-    replace="\"$ROOT\""
-    api=${api//$find/$replace}
+    from="/home/forge/laravel.com"
+    to="\"$ROOT\""
+    api=${api//$from/$to}
     eval "$api"
     exit_if_error
 
@@ -174,7 +181,7 @@ build_api()
 upgrade_me()
 {
     url="https://raw.githubusercontent.com/ElfSundae/sync-laravel.com/master/sync-laravel.com"
-    to=$(fullpath `dirname $0`)/`basename $0`
+    to=$(fullpath `dirname "$0"`)/$(basename "$0")
     wget "$url" -O "$to"
     exit_if_error
     chmod +x "$to"
@@ -200,6 +207,10 @@ while [[ $# > 0 ]]; do
             ;;
         clean)
             CLEAN_REPO=1
+            shift
+            ;;
+        --gaid=*)
+            GAID=`echo $1 | sed -e 's/^[^=]*=//g'`
             shift
             ;;
         -v|--version)
