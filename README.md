@@ -4,6 +4,14 @@
 
 Quickly create a local mirror of [laravel.com](https://laravel.com) website, and keep Laravel documentation up to date.
 
+## Requirements
+
+- PHP >= 7.0.0
+- git
+- composer
+- npm
+- gulp
+
 ## Installation
 
 ```sh
