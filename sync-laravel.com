@@ -9,11 +9,11 @@ Sync local mirror of laravel.com website. v1.1
 Usage: $script <webroot> [<options>]
 
 Options:
-    --status        Check status
-    --skip-docs     Skip building Laravel docs
-    --skip-api      Skip building Laravel api
-    --clean         Clean webroot
-    -h, --help      Show this help
+    --status, status    Check status
+    --skip-docs         Skip building Laravel docs
+    --skip-api          Skip building Laravel api
+    --clean, clean      Clean webroot
+    -h, --help          Show this help
 EOT
 }
 
@@ -151,7 +151,7 @@ build_api()
 
 while [[ $# > 0 ]]; do
     case "$1" in
-        --status)
+        --status|status)
             CHECK_STATUS=1
             shift
             ;;
@@ -163,7 +163,7 @@ while [[ $# > 0 ]]; do
             SKIP_API=1
             shift
             ;;
-        --clean)
+        --clean|clean)
             CLEAN_REPO=1
             shift
             ;;
