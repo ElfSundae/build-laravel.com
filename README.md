@@ -7,6 +7,7 @@ Quickly create a local mirror of [laravel.com](https://laravel.com) website, and
 ## Requirements
 
 - PHP >= 7.0.0
+- wget
 - git
 - composer
 - npm
@@ -17,6 +18,13 @@ Quickly create a local mirror of [laravel.com](https://laravel.com) website, and
 ```sh
 wget https://raw.githubusercontent.com/ElfSundae/sync-laravel.com/master/sync-laravel.com
 chmod +x sync-laravel.com
+./sync-laravel.com -h
+```
+
+Upgrade this script:
+
+```sh
+./sync-laravel.com upgrade
 ```
 
 ## Usage
@@ -33,15 +41,18 @@ You may use `-h` option to see the full usage:
 
 ```sh
 $ ./sync-laravel.com -h
-Sync local mirror of laravel.com website. v1.1
+Sync local mirror of laravel.com website.
+v1.2 - https://github.com/ElfSundae/sync-laravel.com
 
 Usage: sync-laravel.com <webroot> [<options>]
 
 Options:
-    --status        Check status
-    --skip-docs     Skip building Laravel docs
-    --skip-api      Skip building Laravel api
-    --clean         Clean webroot
+    upgrade         Upgrade this script
+    status          Check webroot and docs status
+    skip-docs       Skip building docs
+    skip-api        Skip building api documentation
+    clean           Clean webroot
+    -v, --version   Print version of this script
     -h, --help      Show this help
 ```
 
