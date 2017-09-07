@@ -151,6 +151,7 @@ build_api()
 {
     echo "Building API..."
 
+    # ------------------------------------
     # Fix Sami failure: always use the master code because dev-master
     # from Packagist may not be the newest.
     # https://github.com/FriendsOfPHP/Sami/issues/294
@@ -160,6 +161,10 @@ build_api()
     # composer config repositories.sami '{"type":"vcs","url":"https://github.com/FriendsOfPHP/Sami","no-api":true}'
     # composer require sami/sami:dev-master -q
     # exit_if_error
+    # ---------------
+    cd "$ROOT/build/sami"
+    composer require sami/sami:dev-master -q
+    # ------------------------------------
 
     cd "$ROOT"
 
