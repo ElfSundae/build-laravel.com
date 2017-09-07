@@ -9,17 +9,24 @@ Sync local mirror of laravel.com website. v1.1
 Usage: $script <webroot> [<options>]
 
 Options:
-    --status, status    Check status
-    --skip-docs         Skip building Laravel docs
-    --skip-api          Skip building Laravel api
-    --clean, clean      Clean webroot
-    -h, --help          Show this help
+    update          Update this script
+    status          Check webroot and docs status
+    skip-docs       Skip building docs
+    skip-api        Skip building api documentation
+    clean           Clean webroot
+    -h, --help      Show this help
 EOT
 }
 
 exit_if_error()
 {
     [ $? -eq 0 ] || exit $?
+}
+
+exit_with_usage()
+{
+    echo "\nUse -h to see usage"
+    exit 1
 }
 
 update_repo()
@@ -152,19 +159,23 @@ build_api()
 
 while [[ $# > 0 ]]; do
     case "$1" in
-        --status|status)
+        update)
+            UPDATE_ME=1
+            shift
+            ;;
+        status)
             CHECK_STATUS=1
             shift
             ;;
-        --skip-docs)
+        skip-docs)
             SKIP_DOCS=1
             shift
             ;;
-        --skip-api)
+        skip-api)
             SKIP_API=1
             shift
             ;;
-        --clean|clean)
+        clean)
             CLEAN_REPO=1
             shift
             ;;
@@ -173,7 +184,12 @@ while [[ $# > 0 ]]; do
             exit 0
             ;;
         *)
-            [[ -n $ROOT ]] || ROOT=${1%/}
+            if [[ -z "$ROOT" ]]; then
+                ROOT=${1%/}
+            else
+                echo "Unknown argument: $1"
+                exit_with_usage
+            fi
             shift
             ;;
     esac
@@ -181,8 +197,7 @@ done
 
 if [[ -z "$ROOT" ]]; then
     echo "Missing argument: webroot path"
-    echo "Use -h to see usage"
-    exit 1
+    exit_with_usage
 fi
 
 if [[ -n $CHECK_STATUS ]]; then
