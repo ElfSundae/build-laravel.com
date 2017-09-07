@@ -172,7 +172,7 @@ while [[ $# > 0 ]]; do
             exit 0
             ;;
         *)
-            ROOT=${1%/}
+            [[ -n $ROOT ]] || ROOT=${1%/}
             shift
             ;;
     esac
