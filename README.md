@@ -33,7 +33,7 @@ You may use `-h` option to see the full usage:
 
 ```sh
 $ ./sync-laravel.com -h
-Sync local mirror of laravel.com website. v1.0.0
+Sync local mirror of laravel.com website. v1.1
 
 Usage: sync-laravel.com <webroot> [<options>]
 
