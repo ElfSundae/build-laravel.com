@@ -133,9 +133,9 @@ build_docs()
     done
 
     docs=$(cat build/docs.sh)
-    find="/home/forge/laravel.com"
-    replace="\"$ROOT\""
-    docs=${docs//$find/$replace}
+    from="/home/forge/laravel.com"
+    to="\"$ROOT\""
+    docs=${docs//$from/$to}
     eval "$docs"
     exit_if_error
 }
@@ -162,9 +162,9 @@ build_api()
     mkdir public/api
 
     api=$(cat build/api.sh)
-    find="/home/forge/laravel.com"
-    replace="\"$ROOT\""
-    api=${api//$find/$replace}
+    from="/home/forge/laravel.com"
+    to="\"$ROOT\""
+    api=${api//$from/$to}
     eval "$api"
     exit_if_error
 
