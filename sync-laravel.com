@@ -1,19 +1,23 @@
 #!/bin/sh
 
+VER="v1.1 - https://github.com/ElfSundae/sync-laravel.com"
+
 usage()
 {
     script=$(basename $0)
     cat <<EOT
-Sync local mirror of laravel.com website. v1.1
+Sync local mirror of laravel.com website.
+$VER
 
 Usage: $script <webroot> [<options>]
 
 Options:
-    update          Update this script
+    upgrade         Upgrade this script
     status          Check webroot and docs status
     skip-docs       Skip building docs
     skip-api        Skip building api documentation
     clean           Clean webroot
+    -v, --version   Print version of this script
     -h, --help      Show this help
 EOT
 }
@@ -33,6 +37,14 @@ exit_with_error()
     exit 1
 }
 
+fullpath()
+{
+    pushd "$1" > /dev/null
+    fullpath=`pwd -P`
+    popd > /dev/null
+    echo "$fullpath"
+}
+
 update_repo()
 {
     if ! [[ -d "$ROOT" ]]; then
@@ -44,9 +56,7 @@ update_repo()
 
     exit_if_error
 
-    pushd "$ROOT" > /dev/null
-    ROOT=`pwd -P`
-    popd > /dev/null
+    ROOT=$(fullpath "$ROOT")
 }
 
 clean_repo()
@@ -161,10 +171,19 @@ build_api()
     git checkout composer.json composer.lock
 }
 
+upgrade_me()
+{
+    url="https://raw.githubusercontent.com/ElfSundae/sync-laravel.com/master/sync-laravel.com"
+    to=$(fullpath `dirname $0`)/`basename $0`
+    wget "$url" -O "$to"
+    exit_if_error
+    chmod +x "$to"
+}
+
 while [[ $# > 0 ]]; do
     case "$1" in
-        update)
-            UPDATE_ME=1
+        upgrade)
+            UPGRADE_ME=1
             shift
             ;;
         status)
@@ -183,6 +202,10 @@ while [[ $# > 0 ]]; do
             CLEAN_REPO=1
             shift
             ;;
+        -v|--version)
+            echo "$VER"
+            exit 0
+            ;;
         -h|--help)
             usage
             exit 0
@@ -197,6 +220,11 @@ while [[ $# > 0 ]]; do
             ;;
     esac
 done
+
+if [[ -n $UPGRADE_ME ]]; then
+    upgrade_me
+    exit 0
+fi
 
 if [[ -z "$ROOT" ]]; then
     exit_with_error "Missing argument: webroot path"
