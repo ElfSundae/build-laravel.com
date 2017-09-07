@@ -42,7 +42,7 @@ You may use `-h` option to see the full usage:
 ```sh
 $ ./sync-laravel.com -h
 Sync local mirror of laravel.com website.
-v1.3 - https://github.com/ElfSundae/sync-laravel.com
+v1.4 - https://github.com/ElfSundae/sync-laravel.com
 
 Usage: sync-laravel.com <webroot> [<options>]
 
