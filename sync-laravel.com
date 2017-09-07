@@ -69,6 +69,7 @@ check_status()
     fi
 
     check_git_status "$ROOT"
+    git -C "$ROOT" status
 
     for version in 4.2 5.0 5.1 5.2 5.3 5.4 5.5 master; do
         check_git_status "$ROOT/resources/docs/$version"
