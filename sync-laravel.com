@@ -23,8 +23,12 @@ exit_if_error()
     [ $? -eq 0 ] || exit $?
 }
 
-exit_with_usage()
+exit_with_error()
 {
+    if [[ $# > 0 ]]; then
+        echo "$@"
+    fi
+
     echo "\nUse -h to see usage"
     exit 1
 }
@@ -187,8 +191,7 @@ while [[ $# > 0 ]]; do
             if [[ -z "$ROOT" ]]; then
                 ROOT=${1%/}
             else
-                echo "Unknown argument: $1"
-                exit_with_usage
+                exit_with_error "Unknown argument: $1"
             fi
             shift
             ;;
@@ -196,8 +199,7 @@ while [[ $# > 0 ]]; do
 done
 
 if [[ -z "$ROOT" ]]; then
-    echo "Missing argument: webroot path"
-    exit_with_usage
+    exit_with_error "Missing argument: webroot path"
 fi
 
 if [[ -n $CHECK_STATUS ]]; then
