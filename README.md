@@ -42,7 +42,7 @@ You may use `-h` option to see the full usage:
 ```sh
 $ ./sync-laravel.com -h
 Sync local mirror of laravel.com website.
-v1.4 - https://github.com/ElfSundae/sync-laravel.com
+v1.5 - https://github.com/ElfSundae/sync-laravel.com
 
 Usage: sync-laravel.com <webroot> [<options>]
 
@@ -53,6 +53,7 @@ Options:
     skip-api        Skip building api documentation
     clean           Clean webroot
     --gaid          Set Google Analytics tracking ID, e.g. UA-123456-7
+    --remove-ga     Remove Google Analytics
     -v, --version   Print version of this script
     -h, --help      Show this help
 ```
