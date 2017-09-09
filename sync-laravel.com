@@ -59,50 +59,6 @@ update_repo()
     exit_if_error
 
     ROOT=$(fullpath "$ROOT")
-
-    appView="$ROOT/resources/views/app.blade.php"
-    appContent=$(cat "$appView")
-
-    if [[ -n $GAID ]]; then
-        appContent=${appContent//UA-23865777-1/$GAID}
-        echo "$appContent" > "$appView"
-    fi
-
-    if [[ -n $REMOVE_GA ]]; then
-        from="s.parentNode.insertBefore(g,s)"
-        to="// $from"
-        appContent=${appContent/$from/$to}
-        echo "$appContent" > "$appView"
-    fi
-
-    # Replace CDN static files with local files
-    cloudflares=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
-    echo "$cloudflares" | while read -r line; do
-        md5=`php -r "echo md5('${line}');"`
-        extension="${line##*.}"
-        filename="vendor/$md5.$extension"
-        path="$ROOT/public/$filename"
-        if ! [[ -f "$path" ]]; then
-            url=${line/#\/\//https:\/\/}
-            echo "Downloading $url to public/$filename"
-            mkdir -p "$(dirname "$path")"
-            wget "$url" -O "$path" -T 15 -q || rm -rf "$path"
-        fi
-
-        if [[ -f "$path" ]]; then
-            appContent=${appContent/$line/\/$filename}
-            echo "$appContent" > "$appView"
-        fi
-    done
-
-    # Remove Ads
-    if [[ -n $REMOVE_ADS ]]; then
-        docsView="$ROOT/resources/views/docs.blade.php"
-        docsContent=$(cat "$docsView")
-        carbonads=`echo "$docsContent" | grep -E "carbon\.js"`
-        docsContent=${docsContent//$carbonads}
-        echo "$docsContent" > "$docsView"
-    fi
 }
 
 clean_repo()
@@ -231,6 +187,55 @@ upgrade_me()
     chmod +x "$to"
 }
 
+process_source()
+{
+    appView="$ROOT/resources/views/app.blade.php"
+    appContent=$(cat "$appView")
+
+    # Set GA ID
+    if [[ -n $GAID ]]; then
+        appContent=${appContent//UA-23865777-1/$GAID}
+        echo "$appContent" > "$appView"
+    fi
+
+    # Remove GA
+    if [[ -n $REMOVE_GA ]]; then
+        from="s.parentNode.insertBefore(g,s)"
+        to="// $from"
+        appContent=${appContent/$from/$to}
+        echo "$appContent" > "$appView"
+    fi
+
+    # Replace CDN files with local files
+    cloudflares=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
+    echo "$cloudflares" | while read -r line; do
+        md5=`php -r "echo md5('${line}');"`
+        extension="${line##*.}"
+        filename="vendor/$md5.$extension"
+        path="$ROOT/public/$filename"
+        if ! [[ -f "$path" ]]; then
+            url=${line/#\/\//https:\/\/}
+            echo "Downloading $url to public/$filename"
+            mkdir -p "$(dirname "$path")"
+            wget "$url" -O "$path" -T 15 -q || rm -rf "$path"
+        fi
+
+        if [[ -f "$path" ]]; then
+            appContent=${appContent/$line/\/$filename}
+            echo "$appContent" > "$appView"
+        fi
+    done
+
+    # Remove Ads
+    if [[ -n $REMOVE_ADS ]]; then
+        docsView="$ROOT/resources/views/docs.blade.php"
+        docsContent=$(cat "$docsView")
+        carbonads=`echo "$docsContent" | grep -E "carbon\.js"`
+        docsContent=${docsContent//$carbonads}
+        echo "$docsContent" > "$docsView"
+    fi
+}
+
 while [[ $# > 0 ]]; do
     case "$1" in
         upgrade)
@@ -304,6 +309,7 @@ if [[ -n $CLEAN_REPO ]]; then
 fi
 
 update_repo
+process_source
 update_app
 
 [[ -z $SKIP_DOCS ]] && build_docs
