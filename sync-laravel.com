@@ -18,6 +18,7 @@ Options:
     skip-api        Skip building api documentation
     clean           Clean webroot
     --gaid          Set Google Analytics tracking ID, e.g. UA-123456-7
+    --remove-ga     Remove Google Analytics
     -v, --version   Print version of this script
     -h, --help      Show this help
 EOT
@@ -58,10 +59,18 @@ update_repo()
 
     ROOT=$(fullpath "$ROOT")
 
+    appView="$ROOT/resources/views/app.blade.php"
+    content=$(cat "$appView")
+
     if [[ -n $GAID ]]; then
-        appView="$ROOT/resources/views/app.blade.php"
-        content=$(cat "$appView")
         content=${content//UA-23865777-1/$GAID}
+        echo "$content" > "$appView"
+    fi
+
+    if [[ -n $REMOVE_GA ]]; then
+        from="s.parentNode.insertBefore(g,s)"
+        to="// $from"
+        content=${content/$from/$to}
         echo "$content" > "$appView"
     fi
 }
@@ -216,6 +225,10 @@ while [[ $# > 0 ]]; do
             ;;
         --gaid=*)
             GAID=`echo $1 | sed -e 's/^[^=]*=//g'`
+            shift
+            ;;
+        --remove-ga)
+            REMOVE_GA=1
             shift
             ;;
         -v|--version)
