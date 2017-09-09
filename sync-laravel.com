@@ -73,6 +73,26 @@ update_repo()
         content=${content/$from/$to}
         echo "$content" > "$appView"
     fi
+
+    # Replace CDN static files with local files
+    cloudflares=`echo $content | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
+    echo "$cloudflares" | while read -r line; do
+        md5=`php -r "echo md5('${line}');"`
+        extension="${line##*.}"
+        filename="vendor/$md5.$extension"
+        path="$ROOT/public/$filename"
+        if ! [[ -f "$path" ]]; then
+            url=${line/#\/\//https:\/\/}
+            echo "Downloading $url to public/$filename"
+            mkdir -p "$(dirname "$path")"
+            wget "$url" -O "$path" -T 15 -q || rm -rf "$path"
+        fi
+
+        if [[ -f "$path" ]]; then
+            content=${content/$line/\/$filename}
+            echo "$content" > "$appView"
+        fi
+    done
 }
 
 clean_repo()
