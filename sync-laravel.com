@@ -18,7 +18,8 @@ Options:
     skip-api        Skip building api documentation
     clean           Clean webroot
     --gaid          Set Google Analytics tracking ID, e.g. UA-123456-7
-    --remove-ga     Remove Google Analytics
+    remove-ga       Remove Google Analytics
+    remove-ads      Remove Ads
     -v, --version   Print version of this script
     -h, --help      Show this help
 EOT
@@ -60,22 +61,22 @@ update_repo()
     ROOT=$(fullpath "$ROOT")
 
     appView="$ROOT/resources/views/app.blade.php"
-    content=$(cat "$appView")
+    appContent=$(cat "$appView")
 
     if [[ -n $GAID ]]; then
-        content=${content//UA-23865777-1/$GAID}
-        echo "$content" > "$appView"
+        appContent=${appContent//UA-23865777-1/$GAID}
+        echo "$appContent" > "$appView"
     fi
 
     if [[ -n $REMOVE_GA ]]; then
         from="s.parentNode.insertBefore(g,s)"
         to="// $from"
-        content=${content/$from/$to}
-        echo "$content" > "$appView"
+        appContent=${appContent/$from/$to}
+        echo "$appContent" > "$appView"
     fi
 
     # Replace CDN static files with local files
-    cloudflares=`echo $content | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
+    cloudflares=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
     echo "$cloudflares" | while read -r line; do
         md5=`php -r "echo md5('${line}');"`
         extension="${line##*.}"
@@ -89,10 +90,19 @@ update_repo()
         fi
 
         if [[ -f "$path" ]]; then
-            content=${content/$line/\/$filename}
-            echo "$content" > "$appView"
+            appContent=${appContent/$line/\/$filename}
+            echo "$appContent" > "$appView"
         fi
     done
+
+    # Remove Ads
+    if [[ -n $REMOVE_ADS ]]; then
+        docsView="$ROOT/resources/views/docs.blade.php"
+        docsContent=$(cat "$docsView")
+        carbonads=`echo "$docsContent" | grep -E "carbon\.js"`
+        docsContent=${docsContent//$carbonads}
+        echo "$docsContent" > "$docsView"
+    fi
 }
 
 clean_repo()
@@ -247,8 +257,12 @@ while [[ $# > 0 ]]; do
             GAID=`echo $1 | sed -e 's/^[^=]*=//g'`
             shift
             ;;
-        --remove-ga)
+        remove-ga)
             REMOVE_GA=1
+            shift
+            ;;
+        remove-ads)
+            REMOVE_ADS=1
             shift
             ;;
         -v|--version)
