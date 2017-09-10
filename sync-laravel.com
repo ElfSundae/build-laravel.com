@@ -192,7 +192,7 @@ upgrade_me()
 download()
 {
     url="$1"
-    md5=`php -r "echo md5('$url');"`
+    md5=`php -r "echo md5('$url');" 2>/dev/null`
     if [[ -n $2 ]]; then
         extension=.$2
     else
@@ -203,15 +203,12 @@ download()
 
     if ! [[ -f "$path" ]]; then
         url=${url/#\/\//https:\/\/}
-        echo "Downloading $url to public/$filename"
         mkdir -p "$(dirname "$path")"
-        wget "$url" -O "$path" -T 15 -q || rm -rf "$path"
+        wget "$url" -O "$path" -T 15 &>/dev/null || rm -rf "$path"
     fi
 
     if [[ -f "$path" ]]; then
         echo "$filename"
-    else
-        echo ""
     fi
 }
 
