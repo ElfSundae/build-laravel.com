@@ -16,10 +16,11 @@ Options:
     status          Check webroot and docs status
     skip-docs       Skip building docs
     skip-api        Skip building api documentation
-    clean           Clean webroot
+    local-cdn       Download static files from CDN, and host them locally
     --gaid          Set Google Analytics tracking ID, e.g. UA-123456-7
     remove-ga       Remove Google Analytics
     remove-ads      Remove Ads
+    clean           Clean webroot
     -v, --version   Print version of this script
     -h, --help      Show this help
 EOT
@@ -217,6 +218,18 @@ process_source()
     appView="$ROOT/resources/views/app.blade.php"
     appContent=$(cat "$appView")
 
+    if [[ -n $LOCAL_CDN ]]; then
+        echo "Replacing [cdnjs.cloudflare.com] with local files..."
+        cloudflares=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
+        while read -r line; do
+            filename=$(download $line)
+            if [[ "$filename" ]]; then
+                appContent=${appContent/$line/\/$filename}
+                echo "$appContent" > "$appView"
+            fi
+        done <<< "$cloudflares"
+    fi
+
     # Set GA ID
     if [[ -n $GAID ]]; then
         appContent=${appContent//UA-23865777-1/$GAID}
@@ -230,16 +243,6 @@ process_source()
         appContent=${appContent/$from/$to}
         echo "$appContent" > "$appView"
     fi
-
-    echo "Replacing [cdnjs.cloudflare.com] with local files..."
-    cloudflares=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
-    while read -r line; do
-        filename=$(download $line)
-        if [[ "$filename" ]]; then
-            appContent=${appContent/$line/\/$filename}
-            echo "$appContent" > "$appView"
-        fi
-    done <<< "$cloudflares"
 
     # Remove Ads
     if [[ -n $REMOVE_ADS ]]; then
@@ -269,8 +272,8 @@ while [[ $# > 0 ]]; do
             SKIP_API=1
             shift
             ;;
-        clean)
-            CLEAN_REPO=1
+        local-cdn)
+            LOCAL_CDN=1
             shift
             ;;
         --gaid=*)
@@ -283,6 +286,10 @@ while [[ $# > 0 ]]; do
             ;;
         remove-ads)
             REMOVE_ADS=1
+            shift
+            ;;
+        clean)
+            CLEAN_REPO=1
             shift
             ;;
         -v|--version)
