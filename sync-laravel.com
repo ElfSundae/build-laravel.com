@@ -22,7 +22,7 @@ Options:
     remove-ga       Remove Google Analytics
     remove-ads      Remove Ads
     clean           Clean webroot
-    -v, --version   Print version of this script
+    --version       Print version of this script
     -h, --help      Show this help
 EOT
 }
@@ -303,7 +303,7 @@ while [[ $# > 0 ]]; do
             CLEAN_REPO=1
             shift
             ;;
-        -v|--version)
+        --version)
             echo "$VER"
             exit 0
             ;;
