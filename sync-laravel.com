@@ -201,13 +201,13 @@ download()
     filename="vendor/$md5$extension"
     path="$ROOT/public/$filename"
 
-    if ! [[ -f "$path" ]]; then
+    if ! [[ -s "$path" ]]; then
         url=${url/#\/\//https:\/\/}
         mkdir -p "$(dirname "$path")"
         wget "$url" -O "$path" -T 15 -q || rm -rf "$path"
     fi
 
-    if [[ -f "$path" ]]; then
+    if [[ -s "$path" ]]; then
         echo "$filename"
     fi
 }
