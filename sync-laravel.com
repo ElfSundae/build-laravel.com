@@ -233,7 +233,7 @@ process_source()
 
     echo "Replacing [cdnjs.cloudflare.com] with local files..."
     cloudflares=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
-    while IFS= read -r line; do
+    while read -r line; do
         filename=$(download $line)
         if [[ "$filename" ]]; then
             appContent=${appContent/$line/\/$filename}
