@@ -241,16 +241,6 @@ process_source()
         fi
     done <<< "$cloudflares"
 
-    echo "Replacing [fonts.googleapis.com] with local files..."
-    googleFonts=`echo "$appContent" | grep -o -E "[^'\"]+fonts\.googleapis\.com/css[^'\"]+"`
-    while IFS= read -r line; do
-        filename=$(download $line "css")
-        if [[ "$filename" ]]; then
-            appContent=${appContent/$line/\/$filename}
-            echo "$appContent" > "$appView"
-        fi
-    done <<< "$googleFonts"
-
     # Remove Ads
     if [[ -n $REMOVE_ADS ]]; then
         docsView="$ROOT/resources/views/docs.blade.php"
