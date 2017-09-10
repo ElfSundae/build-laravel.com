@@ -236,14 +236,14 @@ process_source()
 
     if [[ -n $LOCAL_CDN ]]; then
         echo "Replacing [cdnjs.cloudflare.com] with local files..."
-        cloudflares=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
+        cdnjs=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
         while read -r line; do
             filename=$(download $(cdn_url $line))
             if [[ "$filename" ]]; then
                 appContent=${appContent/$line/\/$filename}
                 echo "$appContent" > "$appView"
             fi
-        done <<< "$cloudflares"
+        done <<< "$cdnjs"
     fi
 
     # Replace CDN URLs
