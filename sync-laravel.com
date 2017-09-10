@@ -17,6 +17,7 @@ Options:
     skip-docs       Skip building docs
     skip-api        Skip building api documentation
     local-cdn       Download static files from CDN, and host them locally
+    china-cdn       Use China CDN
     --gaid          Set Google Analytics tracking ID, e.g. UA-123456-7
     remove-ga       Remove Google Analytics
     remove-ads      Remove Ads
@@ -230,6 +231,12 @@ process_source()
         done <<< "$cloudflares"
     fi
 
+    if [[ -n $CHINA_CDN ]]; then
+        appContent=${appContent//cdnjs.cloudflare.com/cdnjs.cat.net}
+        appContent=${appContent//fonts.googleapis.com/fonts.cat.net}
+        echo "$appContent" > "$appView"
+    fi
+
     # Set GA ID
     if [[ -n $GAID ]]; then
         appContent=${appContent//UA-23865777-1/$GAID}
@@ -274,6 +281,10 @@ while [[ $# > 0 ]]; do
             ;;
         local-cdn)
             LOCAL_CDN=1
+            shift
+            ;;
+        china-cdn)
+            CHINA_CDN=1
             shift
             ;;
         --gaid=*)
