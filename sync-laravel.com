@@ -231,7 +231,7 @@ process_source()
         echo "$appContent" > "$appView"
     fi
 
-    # Replace CDN files with local files
+    # Replace cdnjs.cloudflare.com with local files
     cloudflares=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
     echo "$cloudflares" | while read -r line; do
         filename=$(download $line)
