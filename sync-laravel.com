@@ -187,6 +187,34 @@ upgrade_me()
     chmod +x "$to"
 }
 
+# download url [extension]
+# return filename in public directory
+download()
+{
+    url="$1"
+    md5=`php -r "echo md5('$url');"`
+    if [[ -n $2 ]]; then
+        extension=.$2
+    else
+        extension=.${url##*.}
+    fi
+    filename="vendor/$md5$extension"
+    path="$ROOT/public/$filename"
+
+    if ! [[ -f "$path" ]]; then
+        url=${url/#\/\//https:\/\/}
+        echo "Downloading $url to public/$filename"
+        mkdir -p "$(dirname "$path")"
+        wget "$url" -O "$path" -T 15 -q || rm -rf "$path"
+    fi
+
+    if [[ -f "$path" ]]; then
+        echo "$filename"
+    else
+        echo ""
+    fi
+}
+
 process_source()
 {
     appView="$ROOT/resources/views/app.blade.php"
@@ -209,18 +237,8 @@ process_source()
     # Replace CDN files with local files
     cloudflares=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
     echo "$cloudflares" | while read -r line; do
-        md5=`php -r "echo md5('${line}');"`
-        extension="${line##*.}"
-        filename="vendor/$md5.$extension"
-        path="$ROOT/public/$filename"
-        if ! [[ -f "$path" ]]; then
-            url=${line/#\/\//https:\/\/}
-            echo "Downloading $url to public/$filename"
-            mkdir -p "$(dirname "$path")"
-            wget "$url" -O "$path" -T 15 -q || rm -rf "$path"
-        fi
-
-        if [[ -f "$path" ]]; then
+        filename=$(download $line)
+        if [[ "$filename" ]]; then
             appContent=${appContent/$line/\/$filename}
             echo "$appContent" > "$appView"
         fi
