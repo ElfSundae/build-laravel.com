@@ -39,7 +39,7 @@ Then you can run `php artisan serve` to serve the mirror. Or the best practice i
 
 You may use `-h` option to see the full usage:
 
-```sh
+```
 Usage: sync-laravel.com <webroot> [<options>]
 
 Options:
