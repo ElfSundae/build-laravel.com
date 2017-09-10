@@ -40,10 +40,6 @@ Then you can run `php artisan serve` to serve the mirror. Or the best practice i
 You may use `-h` option to see the full usage:
 
 ```sh
-$ ./sync-laravel.com -h
-Sync local mirror of laravel.com website.
-v1.6 - https://github.com/ElfSundae/sync-laravel.com
-
 Usage: sync-laravel.com <webroot> [<options>]
 
 Options:
@@ -57,7 +53,7 @@ Options:
     remove-ga       Remove Google Analytics
     remove-ads      Remove Ads
     clean           Clean webroot
-    -v, --version   Print version of this script
+    --version       Print version of this script
     -h, --help      Show this help
 ```
 
