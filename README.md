@@ -7,11 +7,11 @@ Quickly create a local mirror of [laravel.com](https://laravel.com) website, and
 ## Requirements
 
 - PHP >= 7.0.0
-- wget
-- git
-- composer
-- npm or yarn
-- gulp
+- `wget`
+- `git`
+- `composer`
+- `npm` or `yarn`
+- `gulp`
 
 ## Installation
 
@@ -44,14 +44,14 @@ Usage: sync-laravel.com <webroot> [<options>]
 
 Options:
     upgrade         Upgrade this script
-    status          Check webroot and docs status
+    status          Check status of webroot and docs
     skip-docs       Skip building docs
     skip-api        Skip building api documentation
     local-cdn       Download static files from CDN, and host them locally
     china-cdn       Use China CDN
     --gaid          Set Google Analytics tracking ID, e.g. UA-123456-7
     remove-ga       Remove Google Analytics
-    remove-ads      Remove Ads
+    remove-ads      Remove advertisements
     clean           Clean webroot
     --version       Print version of this script
     -h, --help      Show this help
