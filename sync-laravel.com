@@ -233,6 +233,7 @@ cdn_url()
     if [[ -n $CHINA_CDN ]]; then
         text=${text//cdnjs.cloudflare.com/cdnjs.cat.net}
         text=${text//fonts.googleapis.com/fonts.cat.net}
+        text=${text//fonts.gstatic.com/gstatic.cat.net}
     fi
 
     echo "$text"
@@ -247,7 +248,7 @@ process_source()
         echo "Replacing CDNJS with local files..."
         urls=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
         while read -r line; do
-            filename=$(download $(cdn_url $line))
+            filename=$(download "$(cdn_url $line)")
             if [[ "$filename" ]]; then
                 appContent=${appContent/$line/\/$filename}
                 echo "$appContent" > "$appView"
@@ -278,6 +279,18 @@ process_source()
             if [[ "$filename" ]]; then
                 appContent=${appContent/$line/\/$filename}
                 echo "$appContent" > "$appView"
+
+                # Download font files
+                fontCssPath="$ROOT/public/$filename"
+                fontCssContent=$(cat "$fontCssPath")
+                fontURLs=`echo "$fontCssContent" | grep -o -E "http[^)]+"`
+                while read -r fontLine; do
+                    filename=$(download "$(cdn_url $fontLine)")
+                    if [[ "$filename" ]]; then
+                        fontCssContent=${fontCssContent/$fontLine/\/$filename}
+                        echo "$fontCssContent" > "$fontCssPath"
+                    fi
+                done <<< "$fontURLs"
             fi
         done <<< "$urls"
     fi
