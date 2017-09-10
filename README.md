@@ -43,18 +43,21 @@ You may use `-h` option to see the full usage:
 Usage: sync-laravel.com <webroot> [<options>]
 
 Options:
-    upgrade         Upgrade this script
-    status          Check status of webroot and docs
-    skip-docs       Skip building docs
-    skip-api        Skip building api documentation
-    local-cdn       Download static files from CDN, and host them locally
-    china-cdn       Use China CDN
-    --gaid          Set Google Analytics tracking ID, e.g. UA-123456-7
-    remove-ga       Remove Google Analytics
-    remove-ads      Remove advertisements
-    clean           Clean webroot
-    --version       Print version of this script
-    -h, --help      Show this help
+    upgrade             Upgrade this script
+    status              Check status of webroot and docs
+    skip-docs           Skip building docs
+    skip-api            Skip building api documentation
+    local-cdn           Download static files from CDN, and host them locally
+    --font-format=FMT   Use FMT when downloading Google Fonts
+                        Supported: eot, ttf, svg, woff, woff2
+                        Default format is woff2
+    china-cdn           Replace CDN hosts with China mirrors
+    --gaid=GID          Replace Google Analytics tracking ID with GID
+    remove-ga           Remove Google Analytics
+    remove-ads          Remove advertisements
+    clean               Clean webroot
+    --version           Print version of this script
+    -h, --help          Show this help
 ```
 
 ## Example Nginx Server Configuration

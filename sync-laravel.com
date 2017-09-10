@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="v1.7 - https://github.com/ElfSundae/sync-laravel.com"
+VER="v1.8 - https://github.com/ElfSundae/sync-laravel.com"
 
 usage()
 {
