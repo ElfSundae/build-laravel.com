@@ -204,7 +204,7 @@ download()
     if ! [[ -f "$path" ]]; then
         url=${url/#\/\//https:\/\/}
         mkdir -p "$(dirname "$path")"
-        wget "$url" -O "$path" -T 15 &>/dev/null || rm -rf "$path"
+        wget "$url" -O "$path" -T 15 -q || rm -rf "$path"
     fi
 
     if [[ -f "$path" ]]; then
