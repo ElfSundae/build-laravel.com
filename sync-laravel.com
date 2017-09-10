@@ -231,15 +231,25 @@ process_source()
         echo "$appContent" > "$appView"
     fi
 
-    # Replace cdnjs.cloudflare.com with local files
+    echo "Replacing [cdnjs.cloudflare.com] with local files..."
     cloudflares=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
-    echo "$cloudflares" | while read -r line; do
+    while IFS= read -r line; do
         filename=$(download $line)
         if [[ "$filename" ]]; then
             appContent=${appContent/$line/\/$filename}
             echo "$appContent" > "$appView"
         fi
-    done
+    done <<< "$cloudflares"
+
+    echo "Replacing [fonts.googleapis.com] with local files..."
+    googleFonts=`echo "$appContent" | grep -o -E "[^'\"]+fonts\.googleapis\.com/css[^'\"]+"`
+    while IFS= read -r line; do
+        filename=$(download $line "css")
+        if [[ "$filename" ]]; then
+            appContent=${appContent/$line/\/$filename}
+            echo "$appContent" > "$appView"
+        fi
+    done <<< "$googleFonts"
 
     # Remove Ads
     if [[ -n $REMOVE_ADS ]]; then
