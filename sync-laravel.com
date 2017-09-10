@@ -217,6 +217,18 @@ download()
     fi
 }
 
+cdn_url()
+{
+    text=$1
+
+    if [[ -n $CHINA_CDN ]]; then
+        text=${text//cdnjs.cloudflare.com/cdnjs.cat.net}
+        text=${text//fonts.googleapis.com/fonts.cat.net}
+    fi
+
+    echo "$text"
+}
+
 process_source()
 {
     appView="$ROOT/resources/views/app.blade.php"
@@ -234,11 +246,9 @@ process_source()
         done <<< "$cloudflares"
     fi
 
-    if [[ -n $CHINA_CDN ]]; then
-        appContent=${appContent//cdnjs.cloudflare.com/cdnjs.cat.net}
-        appContent=${appContent//fonts.googleapis.com/fonts.cat.net}
-        echo "$appContent" > "$appView"
-    fi
+    # Replace CDN URLs
+    appContent=$(cdn_url "$appContent")
+    echo "$appContent" > "$appView"
 
     # Set GA ID
     if [[ -n $GAID ]]; then
