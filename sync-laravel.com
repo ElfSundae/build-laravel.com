@@ -105,8 +105,7 @@ update_app()
 {
     cd "$ROOT"
 
-    echo "composer install..."
-    # rm -rf vendor
+    echo "Installing PHP packages..."
     composer install -q
     if ! [[ -f ".env" ]]; then
         echo "APP_KEY=" > .env
@@ -114,9 +113,13 @@ update_app()
     fi
     exit_if_error
 
-    echo "npm install..."
-    # rm -rf node_modules
-    npm install &>/dev/null
+    echo "Installing Node packages..."
+    type yarn &>/dev/null
+    if [[ $? == 0 ]]; then
+        yarn &>/dev/null
+    else
+        npm install &>/dev/null
+    fi
     exit_if_error
 
     echo "gulp --production..."

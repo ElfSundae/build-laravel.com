@@ -10,7 +10,7 @@ Quickly create a local mirror of [laravel.com](https://laravel.com) website, and
 - wget
 - git
 - composer
-- npm
+- npm or yarn
 - gulp
 
 ## Installation
