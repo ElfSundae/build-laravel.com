@@ -196,7 +196,7 @@ upgrade_me()
 # return filename in public directory
 download()
 {
-    url="$1"
+    url=$1
     md5=`php -r "echo md5('$url');" 2>/dev/null`
     if [[ -n $2 ]]; then
         extension=.$2
@@ -238,7 +238,7 @@ process_source()
         echo "Replacing [cdnjs.cloudflare.com] with local files..."
         cloudflares=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
         while read -r line; do
-            filename=$(download $line)
+            filename=$(download $(cdn_url $line))
             if [[ "$filename" ]]; then
                 appContent=${appContent/$line/\/$filename}
                 echo "$appContent" > "$appView"
