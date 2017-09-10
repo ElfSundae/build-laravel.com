@@ -13,7 +13,7 @@ script:
   - bash sync-laravel.com laravel.com status
   - bash sync-laravel.com laravel.com skip-docs
   - bash sync-laravel.com laravel.com skip-api
-  - bash sync-laravel.com laravel.com skip-docs skip-api --gaid=UA-123456-7
+  - bash sync-laravel.com laravel.com skip-api local-cdn china-cdn --gaid=UA-123456-7 remove-ga remove-ads
   - bash sync-laravel.com laravel.com clean
   - bash sync-laravel.com upgrade
 
