@@ -200,7 +200,7 @@ download()
     else
         extension=.${url##*.}
     fi
-    filename="vendor/$md5$extension"
+    filename="storage/$md5$extension"
     path="$ROOT/public/$filename"
 
     if ! [[ -s "$path" ]]; then
