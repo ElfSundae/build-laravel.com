@@ -12,18 +12,21 @@ $VER
 Usage: $script <webroot> [<options>]
 
 Options:
-    upgrade         Upgrade this script
-    status          Check status of webroot and docs
-    skip-docs       Skip building docs
-    skip-api        Skip building api documentation
-    local-cdn       Download static files from CDN, and host them locally
-    china-cdn       Use China CDN
-    --gaid          Set Google Analytics tracking ID, e.g. UA-123456-7
-    remove-ga       Remove Google Analytics
-    remove-ads      Remove advertisements
-    clean           Clean webroot
-    --version       Print version of this script
-    -h, --help      Show this help
+    upgrade             Upgrade this script
+    status              Check status of webroot and docs
+    skip-docs           Skip building docs
+    skip-api            Skip building api documentation
+    local-cdn           Download static files from CDN, and host them locally
+    --font-format=FMT   Use FMT when downloading Google Fonts
+                        Supported: eot, ttf, svg, woff, woff2
+                        Default format is woff2
+    china-cdn           Replace CDN hosts with China mirrors
+    --gaid=GID          Replace Google Analytics tracking ID with GID
+    remove-ga           Remove Google Analytics
+    remove-ads          Remove advertisements
+    clean               Clean webroot
+    --version           Print version of this script
+    -h, --help          Show this help
 EOT
 }
 
@@ -192,24 +195,30 @@ upgrade_me()
     chmod +x "$to"
 }
 
-# download url [extension]
+# download url [<extension>|"auto"] [wget parameters]
 # return filename in public directory
 download()
 {
     url=$1
-    md5=`php -r "echo md5('$url');" 2>/dev/null`
-    if [[ -n $2 ]]; then
-        extension=.$2
-    else
+    shift
+
+    extension=".auto"
+    if [[ -n $1 ]]; then
+        extension=.$1
+        shift
+    fi
+    if [[ $extension == ".auto" ]]; then
         extension=.${url##*.}
     fi
+
+    md5=`php -r "echo md5('$url');" 2>/dev/null`
     filename="storage/$md5$extension"
     path="$ROOT/public/$filename"
 
     if ! [[ -s "$path" ]]; then
         url=${url/#\/\//https:\/\/}
         mkdir -p "$(dirname "$path")"
-        wget "$url" -O "$path" -T 15 -q || rm -rf "$path"
+        wget "$url" -O "$path" -T 15 -q "$@" || rm -rf "$path"
     fi
 
     if [[ -s "$path" ]]; then
@@ -235,15 +244,42 @@ process_source()
     appContent=$(cat "$appView")
 
     if [[ -n $LOCAL_CDN ]]; then
-        echo "Replacing [cdnjs.cloudflare.com] with local files..."
-        cdnjs=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
+        echo "Replacing CDNJS with local files..."
+        urls=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
         while read -r line; do
             filename=$(download $(cdn_url $line))
             if [[ "$filename" ]]; then
                 appContent=${appContent/$line/\/$filename}
                 echo "$appContent" > "$appView"
             fi
-        done <<< "$cdnjs"
+        done <<< "$urls"
+
+        echo "Replacing Google Fonts with local files..."
+        urls=`echo "$appContent" | grep -o -E "[^'\"]+fonts\.googleapis\.com/css[^'\"]+"`
+        while read -r line; do
+            # Use different User Agent to download certain format of fonts.
+            # Default format is woff2.
+            # See https://stackoverflow.com/a/27308229/521946
+            if [[ $FONT_FORMAT == "eot" ]]; then
+                userAgent="Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; GTB7.4; InfoPath.2; SV1; .NET CLR 3.3.69573; WOW64; en-US)"
+            elif [[ $FONT_FORMAT == "ttf" ]]; then
+                userAgent="Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1"
+            elif [[ $FONT_FORMAT == "svg" ]]; then
+                userAgent="Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1C25 Safari/419.3"
+            elif [[ $FONT_FORMAT == "woff" ]]; then
+                userAgent="Mozilla/5.0 (Windows; U; MSIE 9.0; Windows NT 9.0; en-US))"
+            else
+                FONT_FORMAT="woff2"
+                userAgent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"
+            fi
+
+            url=$(cdn_url $line)"&$FONT_FORMAT"
+            filename=$(download "$url" "css" --user-agent="$userAgent")
+            if [[ "$filename" ]]; then
+                appContent=${appContent/$line/\/$filename}
+                echo "$appContent" > "$appView"
+            fi
+        done <<< "$urls"
     fi
 
     # Replace CDN URLs
@@ -294,6 +330,10 @@ while [[ $# > 0 ]]; do
             ;;
         local-cdn)
             LOCAL_CDN=1
+            shift
+            ;;
+        --font-format=*)
+            FONT_FORMAT=`echo $1 | sed -e 's/^[^=]*=//g'`
             shift
             ;;
         china-cdn)
