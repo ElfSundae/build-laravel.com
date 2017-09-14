@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="v1.8 - https://github.com/ElfSundae/sync-laravel.com"
+VER="v1.9 - https://github.com/ElfSundae/sync-laravel.com"
 
 usage()
 {
@@ -62,8 +62,6 @@ update_repo()
         git -C "$ROOT" pull origin master
     fi
     exit_if_error
-
-    ROOT=$(fullpath "$ROOT")
 }
 
 clean_repo()
@@ -110,11 +108,18 @@ update_app()
 
     echo "Installing PHP packages..."
     composer install -q
+    exit_if_error
+
     if ! [[ -f ".env" ]]; then
         echo "APP_KEY=" > .env
         php artisan key:generate
+        exit_if_error
     fi
-    exit_if_error
+
+    if ! [[ -d "public/storage" ]]; then
+        php artisan storage:link
+        exit_if_error
+    fi
 
     echo "Installing Node packages..."
     type yarn &>/dev/null
@@ -124,8 +129,13 @@ update_app()
         npm install &>/dev/null
     fi
     exit_if_error
+}
 
-    echo "gulp --production..."
+compile_assets()
+{
+    cd "$ROOT"
+
+    echo "Compiling Assets..."
     gulp --production &>/dev/null
     exit_if_error
 }
@@ -419,8 +429,11 @@ if [[ -n $CLEAN_REPO ]]; then
 fi
 
 update_repo
-process_source
+ROOT=$(fullpath "$ROOT")
+
 update_app
+process_source
+compile_assets
 
 [[ -z $SKIP_DOCS ]] && build_docs
 [[ -z $SKIP_API ]] && build_api
