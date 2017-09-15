@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="v1.9 - https://github.com/ElfSundae/sync-laravel.com"
+VER="v1.10 - https://github.com/ElfSundae/sync-laravel.com"
 
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
@@ -211,8 +211,7 @@ build_api()
 
     cd "$ROOT"
 
-    # Create "public/api" directory to make `cp -r build/sami/build/* public/api`
-    # in `api.sh` work.
+    # Create "public/api" directory to make `cp -r build/sami/build/* public/api` work in `api.sh`.
     rm -rf public/api
     mkdir public/api
 
