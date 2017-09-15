@@ -147,18 +147,47 @@ build_docs()
 
     cd "$ROOT"
 
+    # ------------------------------------
+    # Use "build/docs.sh" to build
+    # ------------------------------------
+    # for version in "${DOC_VERSIONS[@]}"; do
+    #     path="resources/docs/$version"
+    #     if ! [[ -d "$path" ]]; then
+    #         git clone git://github.com/laravel/docs.git --single-branch --branch=$version "$path"
+    #     fi
+    # done
+    #
+    # docs=$(cat build/docs.sh)
+    # from="/home/forge/laravel.com"
+    # to="\"$ROOT\""
+    # docs=${docs//$from/$to}
+    # eval "$docs"
+    # exit_if_error
+    # ------------------------------------
+
+    docsChanged=0
     for version in "${DOC_VERSIONS[@]}"; do
-        if ! [[ -d "resources/docs/$version" ]]; then
-            git clone git://github.com/laravel/docs.git --single-branch --branch=$version resources/docs/$version -q
+        path="resources/docs/$version"
+        if ! [[ -d "$path" ]]; then
+            git clone git://github.com/laravel/docs.git --single-branch --branch=$version "$path"
+            docsChanged=1
+        else
+            oldRev=$(git -C "$path" rev-parse HEAD)
+            git -C "$path" pull origin $version
+            newRev=$(git -C "$path" rev-parse HEAD)
+
+            if [[ $oldRev == $newRev ]]; then
+                docsChanged=$(( $docsChanged | 0 ))
+            else
+                docsChanged=$(( $docsChanged | 1 ))
+            fi
         fi
     done
 
-    docs=$(cat build/docs.sh)
-    from="/home/forge/laravel.com"
-    to="\"$ROOT\""
-    docs=${docs//$from/$to}
-    eval "$docs"
-    exit_if_error
+    if [[ $docsChanged != 0 ]]; then
+        php artisan docs:clear-cache
+        exit_if_error
+    fi
 }
 
 build_api()
