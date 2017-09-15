@@ -55,17 +55,6 @@ fullpath()
     echo "$fullpath"
 }
 
-update_repo()
-{
-    if ! [[ -d "$ROOT" ]]; then
-        git clone git://github.com/laravel/laravel.com.git "$ROOT"
-    else
-        git -C "$ROOT" reset --hard
-        git -C "$ROOT" pull origin master
-    fi
-    exit_if_error
-}
-
 clean_repo()
 {
     if [[ -d "$ROOT" ]]; then
@@ -106,6 +95,16 @@ check_status()
 
 update_app()
 {
+    if ! [[ -d "$ROOT" ]]; then
+        git clone git://github.com/laravel/laravel.com.git "$ROOT"
+    else
+        git -C "$ROOT" reset --hard
+        git -C "$ROOT" pull origin master
+    fi
+    exit_if_error
+
+    ROOT=$(fullpath "$ROOT")
+
     cd "$ROOT"
 
     echo "Installing PHP packages..."
@@ -430,10 +429,8 @@ if [[ -n $CLEAN_REPO ]]; then
     exit 0
 fi
 
-update_repo
-ROOT=$(fullpath "$ROOT")
-
 update_app
+
 process_source
 compile_assets
 
