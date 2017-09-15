@@ -38,10 +38,10 @@ exit_if_error()
 exit_with_error()
 {
     if [[ $# > 0 ]]; then
-        echo "$@"
+        echo "$@\n"
     fi
 
-    echo "\nUse -h to see usage"
+    echo "Use -h to see usage"
     exit 1
 }
 
