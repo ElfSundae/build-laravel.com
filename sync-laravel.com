@@ -2,6 +2,8 @@
 
 VER="v1.9 - https://github.com/ElfSundae/sync-laravel.com"
 
+DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
+
 usage()
 {
     script=$(basename $0)
@@ -97,7 +99,7 @@ check_status()
     check_git_status "$ROOT"
     git -C "$ROOT" status
 
-    for version in 4.2 5.0 5.1 5.2 5.3 5.4 5.5 master; do
+    for version in "${DOC_VERSIONS[@]}"; do
         check_git_status "$ROOT/resources/docs/$version"
     done
 }
@@ -146,7 +148,7 @@ build_docs()
 
     cd "$ROOT"
 
-    for version in 4.2 5.0 5.1 5.2 5.3 5.4 5.5 master; do
+    for version in "${DOC_VERSIONS[@]}"; do
         if ! [[ -d "resources/docs/$version" ]]; then
             git clone git://github.com/laravel/docs.git --single-branch --branch=$version resources/docs/$version -q
         fi
