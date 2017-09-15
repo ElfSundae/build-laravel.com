@@ -1,6 +1,8 @@
 #!/bin/sh
 
-VER="v1.9 - https://github.com/ElfSundae/sync-laravel.com"
+VER="v1.10 - https://github.com/ElfSundae/sync-laravel.com"
+
+DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
 usage()
 {
@@ -38,10 +40,10 @@ exit_if_error()
 exit_with_error()
 {
     if [[ $# > 0 ]]; then
-        echo "$@"
+        echo "$@\n"
     fi
 
-    echo "\nUse -h to see usage"
+    echo "Use -h to see usage"
     exit 1
 }
 
@@ -51,17 +53,6 @@ fullpath()
     fullpath=`pwd -P`
     popd > /dev/null
     echo "$fullpath"
-}
-
-update_repo()
-{
-    if ! [[ -d "$ROOT" ]]; then
-        git clone git://github.com/laravel/laravel.com.git "$ROOT"
-    else
-        git -C "$ROOT" reset --hard
-        git -C "$ROOT" pull origin master
-    fi
-    exit_if_error
 }
 
 clean_repo()
@@ -97,13 +88,23 @@ check_status()
     check_git_status "$ROOT"
     git -C "$ROOT" status
 
-    for version in 4.2 5.0 5.1 5.2 5.3 5.4 5.5 master; do
+    for version in "${DOC_VERSIONS[@]}"; do
         check_git_status "$ROOT/resources/docs/$version"
     done
 }
 
 update_app()
 {
+    if ! [[ -d "$ROOT" ]]; then
+        git clone git://github.com/laravel/laravel.com.git "$ROOT"
+    else
+        git -C "$ROOT" reset --hard
+        git -C "$ROOT" pull origin master
+    fi
+    exit_if_error
+
+    ROOT=$(fullpath "$ROOT")
+
     cd "$ROOT"
 
     echo "Installing PHP packages..."
@@ -146,18 +147,47 @@ build_docs()
 
     cd "$ROOT"
 
-    for version in 4.2 5.0 5.1 5.2 5.3 5.4 5.5 master; do
-        if ! [[ -d "resources/docs/$version" ]]; then
-            git clone git://github.com/laravel/docs.git --single-branch --branch=$version resources/docs/$version -q
+    # ------------------------------------
+    # Use "build/docs.sh" to build
+    # ------------------------------------
+    # for version in "${DOC_VERSIONS[@]}"; do
+    #     path="resources/docs/$version"
+    #     if ! [[ -d "$path" ]]; then
+    #         git clone git://github.com/laravel/docs.git --single-branch --branch=$version "$path"
+    #     fi
+    # done
+    #
+    # docs=$(cat build/docs.sh)
+    # from="/home/forge/laravel.com"
+    # to="\"$ROOT\""
+    # docs=${docs//$from/$to}
+    # eval "$docs"
+    # exit_if_error
+    # ------------------------------------
+
+    docsChanged=0
+    for version in "${DOC_VERSIONS[@]}"; do
+        path="resources/docs/$version"
+        if ! [[ -d "$path" ]]; then
+            git clone git://github.com/laravel/docs.git --single-branch --branch=$version "$path"
+            docsChanged=1
+        else
+            oldRev=$(git -C "$path" rev-parse HEAD)
+            git -C "$path" pull origin $version
+            newRev=$(git -C "$path" rev-parse HEAD)
+
+            if [[ $oldRev == $newRev ]]; then
+                docsChanged=$(( $docsChanged | 0 ))
+            else
+                docsChanged=$(( $docsChanged | 1 ))
+            fi
         fi
     done
 
-    docs=$(cat build/docs.sh)
-    from="/home/forge/laravel.com"
-    to="\"$ROOT\""
-    docs=${docs//$from/$to}
-    eval "$docs"
-    exit_if_error
+    if [[ $docsChanged != 0 ]]; then
+        php artisan docs:clear-cache
+        exit_if_error
+    fi
 }
 
 build_api()
@@ -181,8 +211,7 @@ build_api()
 
     cd "$ROOT"
 
-    # Create "public/api" directory to make `cp -r build/sami/build/* public/api`
-    # in `api.sh` work.
+    # Create "public/api" directory to make `cp -r build/sami/build/* public/api` work in `api.sh`.
     rm -rf public/api
     mkdir public/api
 
@@ -428,10 +457,8 @@ if [[ -n $CLEAN_REPO ]]; then
     exit 0
 fi
 
-update_repo
-ROOT=$(fullpath "$ROOT")
-
 update_app
+
 process_source
 compile_assets
 
