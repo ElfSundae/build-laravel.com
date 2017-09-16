@@ -123,7 +123,7 @@ update_app()
         exit_if_error
     fi
 
-    # php artisan config:cache
+    php artisan config:cache
     # php artisan route:cache
 
     echo "Installing Node packages..."
