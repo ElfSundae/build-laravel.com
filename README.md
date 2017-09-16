@@ -4,7 +4,7 @@
 
 Quickly create a local mirror of [laravel.com](https://laravel.com) website, and keep Laravel documentation up to date.
 
-中国镜像：<a href="https://laravel.0x123.com" target="_blank">laravel.0x123.com</a>
+中国镜像：https://laravel.0x123.com
 
 ## Requirements
 
