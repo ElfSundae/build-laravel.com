@@ -109,7 +109,7 @@ update_app()
     cd "$ROOT"
 
     echo "Installing PHP packages..."
-    composer install -q
+    composer install --no-dev --no-interaction -q
     exit_if_error
 
     if ! [[ -f ".env" ]]; then
@@ -122,6 +122,9 @@ update_app()
         php artisan storage:link
         exit_if_error
     fi
+
+    php artisan config:cache
+    php artisan route:cache
 
     echo "Installing Node packages..."
     type yarn &>/dev/null
