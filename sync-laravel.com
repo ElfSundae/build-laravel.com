@@ -250,12 +250,12 @@ download()
     url=$1
     shift
 
-    extension=".auto"
+    extension="__auto__"
     if [[ -n $1 ]]; then
         extension=.$1
         shift
     fi
-    if [[ $extension == ".auto" ]]; then
+    if [[ $extension == "__auto__" ]]; then
         extension=.${url##*.}
     fi
 
