@@ -28,6 +28,7 @@ Options:
     remove-ga           Remove Google Analytics
     remove-ads          Remove advertisements
     clean               Clean webroot
+    -f, --force         Force build
     --version           Print version of this script
     -h, --help          Show this help
 EOT
@@ -206,7 +207,7 @@ build_api()
     sami=${ROOT}/build/sami
 
     cd "$sami"
-    composer update
+    composer update -q
     exit_if_error
     git checkout composer.lock
 
@@ -215,9 +216,14 @@ build_api()
     else
         git -C "laravel" reset --hard
         git -C "laravel" clean -dfx
+        oldRev=$(git -C "laravel" rev-parse HEAD)
         git -C "laravel" pull
+        newRev=$(git -C "laravel" rev-parse HEAD)
+
+        if [[ $oldRev == $newRev ]] && [[ -z $FORCE ]]; then
+            return
+        fi
     fi
-    exit_if_error
 
     rm -rf build
     rm -rf cache
@@ -434,6 +440,10 @@ while [[ $# > 0 ]]; do
             ;;
         clean)
             CLEAN_REPO=1
+            shift
+            ;;
+        -f|--force)
+            FORCE=1
             shift
             ;;
         --version)
