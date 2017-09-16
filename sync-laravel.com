@@ -22,6 +22,7 @@ Options:
     --font-format=FMT   Use FMT when downloading Google Fonts
                         Supported: eot, ttf, svg, woff, woff2
                         Default format is woff2
+    --title=TXT         Replace page title to TXT
     china-cdn           Replace CDN hosts with China mirrors
     --gaid=GID          Replace Google Analytics tracking ID with GID
     remove-ga           Remove Google Analytics
@@ -288,6 +289,7 @@ process_source()
     appView="$ROOT/resources/views/app.blade.php"
     appContent=$(cat "$appView")
 
+    # Download CDN files and host them locally
     if [[ -n $LOCAL_CDN ]]; then
         echo "Replacing CDNJS with local files..."
         urls=`echo "$appContent" | grep -o -E "[^'\"]+cdnjs\.cloudflare\.com[^'\"]+"`
@@ -337,6 +339,13 @@ process_source()
                 done <<< "$fontURLs"
             fi
         done <<< "$urls"
+    fi
+
+    # Replace page title
+    if [[ -n "$TITLE" ]]; then
+        original="Laravel - The PHP Framework For Web Artisans"
+        appContent=${appContent//$original/$TITLE}
+        echo "$appContent" > "$appView"
     fi
 
     # Replace CDN URLs
@@ -402,6 +411,10 @@ while [[ $# > 0 ]]; do
             ;;
         --font-format=*)
             FONT_FORMAT=`echo $1 | sed -e 's/^[^=]*=//g'`
+            shift
+            ;;
+        --title=*)
+            TITLE=`echo $1 | sed -e 's/^[^=]*=//g'`
             shift
             ;;
         china-cdn)
