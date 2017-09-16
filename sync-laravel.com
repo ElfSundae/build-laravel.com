@@ -207,7 +207,7 @@ build_api()
     sami=${ROOT}/build/sami
 
     cd "$sami"
-    composer update -q
+    composer update
     exit_if_error
     git checkout composer.lock
 
