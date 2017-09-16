@@ -184,10 +184,15 @@ build_docs()
         fi
     done
 
-    if [[ $docsChanged != 0 ]]; then
+    # TODO: Remove this 'if' if you have really known how does the page cache work.
+    #
+    # Docs page caches are the whole html contents (http response), and they
+    # should be removed after docs changed, assets file (view/js/css) changed,
+    # it may be used by a HTTP server like Nginx.
+    # if [[ $docsChanged != 0 ]]; then
         php artisan docs:clear-cache
         exit_if_error
-    fi
+    # fi
 }
 
 build_api()
