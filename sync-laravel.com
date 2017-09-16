@@ -203,23 +203,31 @@ build_api()
 {
     echo "Building API..."
 
-    cd "$ROOT/build/sami"
-    composer update -q
+    sami=${ROOT}/build/sami
 
-    cd "$ROOT"
+    cd "$sami"
+    composer update
+    exit_if_error
+    git checkout composer.lock
 
-    # Create "public/api" directory to make `cp -r build/sami/build/* public/api` work in `api.sh`.
-    rm -rf public/api
-    mkdir public/api
-
-    api=$(cat build/api.sh)
-    from="/home/forge/laravel.com"
-    to="\"$ROOT\""
-    api=${api//$from/$to}
-    eval "$api"
+    if ! [[ -d "laravel" ]]; then
+        git clone git://github.com/laravel/framework.git laravel
+    else
+        git -C "laravel" reset --hard
+        git -C "laravel" clean -dfx
+        git -C "laravel" pull
+    fi
     exit_if_error
 
-    git checkout composer.json composer.lock
+    rm -rf build
+    rm -rf cache
+    ./vendor/bin/sami.php update sami.php
+    exit_if_error
+
+    mkdir -p "$ROOT/public/api"
+    cp -af build/* "$ROOT/public/api"
+    rm -rf build
+    rm -rf cache
 }
 
 upgrade_me()
