@@ -51,6 +51,7 @@ Options:
     --font-format=FMT   Use FMT when downloading Google Fonts
                         Supported: eot, ttf, svg, woff, woff2
                         Default format is woff2
+    --title=TXT         Replace page title to TXT
     china-cdn           Replace CDN hosts with China mirrors
     --gaid=GID          Replace Google Analytics tracking ID with GID
     remove-ga           Remove Google Analytics
