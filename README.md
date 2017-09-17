@@ -1,8 +1,10 @@
 <p align="center"><a href="https://laravel.0x123.com" target="_blank"><img src="https://laravel.0x123.com/assets/img/components/logo-laravel.svg"></a></p>
 
-[![Build Status](https://travis-ci.org/ElfSundae/sync-laravel.com.svg?branch=master)](https://travis-ci.org/ElfSundae/sync-laravel.com)
+[![Build Status](https://img.shields.io/travis/ElfSundae/sync-laravel.com/master.svg?style=flat-square)](https://travis-ci.org/ElfSundae/sync-laravel.com)
 
 Quickly create a local mirror of [laravel.com](https://laravel.com) website, and keep Laravel documentation up to date.
+
+中国镜像：https://laravel.0x123.com
 
 ## Requirements
 
