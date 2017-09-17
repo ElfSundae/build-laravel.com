@@ -57,6 +57,7 @@ Options:
     remove-ga           Remove Google Analytics
     remove-ads          Remove advertisements
     clean               Clean webroot
+    -f, --force         Force build
     --version           Print version of this script
     -h, --help          Show this help
 ```
