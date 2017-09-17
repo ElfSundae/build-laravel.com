@@ -118,7 +118,7 @@ update_app()
         git clone git://github.com/laravel/laravel.com.git "$ROOT"
     else
         git -C "$ROOT" reset --hard
-        git -C "$ROOT" pull origin master
+        git -C "$ROOT" pull #origin master
     fi
     exit_if_error
 
