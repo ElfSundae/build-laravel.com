@@ -27,6 +27,8 @@ Options:
     --gaid=GID          Replace Google Analytics tracking ID with GID
     remove-ga           Remove Google Analytics
     remove-ads          Remove advertisements
+    cache               Create cache for all pages
+    --root-url=URL      Set the root URL of website
     clean               Clean webroot
     -f, --force         Force build
     --version           Print version of this script
@@ -118,7 +120,7 @@ update_app()
         git clone git://github.com/laravel/laravel.com.git "$ROOT"
     else
         git -C "$ROOT" reset --hard
-        git -C "$ROOT" pull #origin master
+        git -C "$ROOT" pull origin master
     fi
     exit_if_error
 
@@ -134,8 +136,21 @@ update_app()
 
     if ! [[ -f ".env" ]]; then
         echo "APP_KEY=" > .env
+        php artisan config:clear -q
         php artisan key:generate
         exit_if_error
+    fi
+
+    if [[ -n "$ROOT_URL" ]]; then
+        oldAppUrl=$(cat .env | grep "APP_URL=" -m1)
+        newAppUrl="APP_URL=$ROOT_URL"
+        if [[ -n "$oldAppUrl" ]]; then
+            envContent=$(cat .env)
+            envContent=${envContent/$oldAppUrl/$newAppUrl}
+            echo "$envContent" > .env
+        else
+            echo "$newAppUrl" >> .env
+        fi
     fi
 
     if ! [[ -d "public/storage" ]]; then
@@ -224,6 +239,11 @@ build_api()
     cp -af build/* "$ROOT/public/api"
     rm -rf build
     rm -rf cache
+}
+
+create_cache()
+{
+
 }
 
 upgrade_me()
@@ -429,6 +449,14 @@ while [[ $# > 0 ]]; do
             REMOVE_ADS=1
             shift
             ;;
+        cache)
+            CACHE=1
+            shift
+            ;;
+        --root-url=*)
+            ROOT_URL=`echo $1 | sed -e 's/^[^=]*=//g'`
+            shift
+            ;;
         clean)
             CLEAN_REPO=1
             shift
@@ -482,5 +510,6 @@ compile_assets
 
 [[ -z $SKIP_DOCS ]] && build_docs
 [[ -z $SKIP_API ]] && build_api
+[[ -n $CACHE ]] && create_cache
 
 echo "Completed successfully!"
