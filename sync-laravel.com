@@ -27,7 +27,7 @@ Options:
     --gaid=GID          Replace Google Analytics tracking ID with GID
     remove-ga           Remove Google Analytics
     remove-ads          Remove advertisements
-    cache               Create cache for all pages
+    cache               Create website cache
     --root-url=URL      Set the root URL of website
     clean               Clean webroot
     -f, --force         Force build
@@ -102,6 +102,7 @@ process_source()
     httpKernel="$ROOT/app/Http/Kernel.php"
     httpKernelContent=$(cat "$httpKernel")
     removeLines=(
+        "\App\Http\Middleware\CacheResponse::class,"
         "\App\Http\Middleware\EncryptCookies::class,"
         "\Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,"
         "\Illuminate\Session\Middleware\StartSession::class,"
@@ -239,13 +240,6 @@ build_api()
     cp -af build/* "$ROOT/public/api"
     rm -rf build
     rm -rf cache
-}
-
-cache_site()
-{
-    cd "$ROOT"
-
-
 }
 
 upgrade_me()
@@ -401,6 +395,94 @@ process_views()
         marketingContent=${marketingContent/$external/\/$filename}
         echo "$marketingContent" > "$marketingView"
     fi
+}
+
+cache_site()
+{
+    cacheSiteFile=$ROOT/app/CacheSite.php
+
+    cat <<'EOT' > "$cacheSiteFile"
+<?php
+
+namespace App;
+
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+
+class CacheSite
+{
+    public function cache()
+    {
+        foreach ($this->getAllRouteUri() as $uri) {
+            $request = \Request::createFromBase(SymfonyRequest::create(url($uri)));
+            $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
+            $this->saveResponse($request, $response);
+        }
+    }
+
+    protected function getAllRouteUri()
+    {
+        $result = ['404'];
+
+        foreach (\Route::getRoutes() as $route) {
+            if (! starts_with($route->uri(), 'docs')) {
+                $result[] = $route->uri();
+            }
+        }
+
+        $resourcePath = resource_path();
+        foreach (\File::directories($resourcePath.'/docs') as $dir) {
+            $result[] = Str::replaceFirst($resourcePath.'/', '', $dir);
+
+            if ($files = glob($dir.'/*.md')) {
+                foreach($files as $file) {
+                    $file = Str::replaceFirst($resourcePath.'/', '', $file);
+                    $file = Str::replaceLast('.md', '', $file);
+                    $result[] = $file;
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    protected function saveResponse($request, $response)
+    {
+        $path = public_path('storage/site-cache/'.(trim($request->getPathInfo(), '/') ?: 'index').'.html');
+        $content = $response->getContent();
+
+        if (file_exists($path) && md5_file($path) == md5($content)) {
+            return;
+        }
+
+        if (! is_dir($dir = pathinfo($path, PATHINFO_DIRNAME))) {
+            @mkdir($dir, 0775, true);
+        }
+
+        file_put_contents($path, $content);
+    }
+}
+EOT
+
+    # Register command
+    kernel="$ROOT/app/Console/Kernel.php"
+    kernelContent=$(cat "$kernel")
+    from='$this->command('
+    to=$(cat <<'EOT'
+$this->command('cache-site', function () {
+    app()->call('App\CacheSite@cache');
+});
+EOT)
+    to="$to\n$from"
+    kernelContent=${kernelContent/"$from"/"$to"}
+    echo "$kernelContent" > "$kernel"
+
+    cd "$ROOT"
+    echo "Creating website cache..."
+    php artisan cache-site
+
+    rm -rf "$cacheSiteFile"
+    git checkout "$kernel"
 }
 
 DOCS_UPDATED=()
