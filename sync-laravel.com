@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="v1.12 - https://github.com/ElfSundae/sync-laravel.com"
+VER="v1.13 - https://github.com/ElfSundae/sync-laravel.com"
 
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
@@ -16,7 +16,7 @@ Usage: $script <webroot> [<options>]
 Options:
     upgrade             Upgrade this script
     status              Check status of webroot and docs
-    skip-docs           Skip building docs
+    skip-docs           Skip updating docs
     skip-api            Skip building api documentation
     local-cdn           Download static files from CDN, and host them locally
     --font-format=FMT   Use FMT when downloading Google Fonts
@@ -27,6 +27,8 @@ Options:
     --gaid=GID          Replace Google Analytics tracking ID with GID
     remove-ga           Remove Google Analytics
     remove-ads          Remove advertisements
+    cache               Create website cache
+    --root-url=URL      Set the root URL of website
     clean               Clean webroot
     -f, --force         Force build
     --version           Print version of this script
@@ -100,6 +102,7 @@ process_source()
     httpKernel="$ROOT/app/Http/Kernel.php"
     httpKernelContent=$(cat "$httpKernel")
     removeLines=(
+        "\App\Http\Middleware\CacheResponse::class,"
         "\App\Http\Middleware\EncryptCookies::class,"
         "\Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,"
         "\Illuminate\Session\Middleware\StartSession::class,"
@@ -134,8 +137,21 @@ update_app()
 
     if ! [[ -f ".env" ]]; then
         echo "APP_KEY=" > .env
+        php artisan config:clear -q
         php artisan key:generate
         exit_if_error
+    fi
+
+    if [[ -n "$ROOT_URL" ]]; then
+        oldAppUrl=$(cat .env | grep "APP_URL=" -m1)
+        newAppUrl="APP_URL=$ROOT_URL"
+        if [[ -n "$oldAppUrl" ]]; then
+            envContent=$(cat .env)
+            envContent=${envContent/$oldAppUrl/$newAppUrl}
+            echo "$envContent" > .env
+        else
+            echo "$newAppUrl" >> .env
+        fi
     fi
 
     if ! [[ -d "public/storage" ]]; then
@@ -165,7 +181,7 @@ compile_assets()
     exit_if_error
 }
 
-build_docs()
+update_docs()
 {
     echo "Updating docs..."
 
@@ -175,15 +191,8 @@ build_docs()
         path="resources/docs/$version"
         if ! [[ -d "$path" ]]; then
             git clone git://github.com/laravel/docs.git --single-branch --branch="$version" "$path"
-            DOCS_UPDATED+=("$version")
         else
-            oldRev=$(git -C "$path" rev-parse HEAD)
             git -C "$path" pull origin "$version"
-            newRev=$(git -C "$path" rev-parse HEAD)
-
-            if [[ $oldRev != $newRev ]]; then
-                DOCS_UPDATED+=("$version")
-            fi
         fi
     done
 
@@ -192,28 +201,29 @@ build_docs()
 
 build_api()
 {
-    echo "Building API..."
+    echo "Building API documentation..."
 
     sami=${ROOT}/build/sami
 
     cd "$sami"
-    composer update
-    exit_if_error
-    git checkout composer.lock
 
     if ! [[ -d "laravel" ]]; then
         git clone git://github.com/laravel/framework.git laravel
     else
         git -C "laravel" reset --hard
         git -C "laravel" clean -dfx
-        oldRev=$(git -C "laravel" rev-parse HEAD)
-        git -C "laravel" pull
-        newRev=$(git -C "laravel" rev-parse HEAD)
+        oldRev=$(git -C "laravel" log -1 --format="%h" --all)
+        git -C "laravel" fetch
+        newRev=$(git -C "laravel" log -1 --format="%h" --all)
 
         if [[ -d "$ROOT/public/api" ]] && [[ $oldRev == $newRev ]] && [[ -z $FORCE ]]; then
             return
         fi
     fi
+
+    composer update
+    exit_if_error
+    git checkout composer.lock
 
     rm -rf build
     rm -rf cache
@@ -381,7 +391,109 @@ process_views()
     fi
 }
 
-DOCS_UPDATED=()
+cache_site()
+{
+    cacheSiteFile=$ROOT/app/CacheSite.php
+
+    cat <<'EOT' > "$cacheSiteFile"
+<?php
+
+namespace App;
+
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+
+class CacheSite
+{
+    public function cache()
+    {
+        $allUrl = array_map('url', $this->getAllUri());
+
+        foreach ($allUrl as $url) {
+            $request = \Request::createFromBase(SymfonyRequest::create($url));
+            $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
+            $this->saveResponse($request, $response);
+        }
+
+        $this->saveFile('sitemap.txt', implode(PHP_EOL, $allUrl));
+    }
+
+    protected function getAllUri()
+    {
+        $result = [];
+
+        foreach (\Route::getRoutes() as $route) {
+            if (! starts_with($route->uri(), 'docs')) {
+                $result[] = $route->uri();
+            }
+        }
+
+        $resourcePath = resource_path();
+        foreach (\File::directories($resourcePath.'/docs') as $dir) {
+            $result[] = Str::replaceFirst($resourcePath.'/', '', $dir);
+
+            if ($files = glob($dir.'/*.md')) {
+                foreach($files as $file) {
+                    $file = Str::replaceFirst($resourcePath.'/', '', $file);
+                    $file = Str::replaceLast('.md', '', $file);
+                    $result[] = $file;
+                }
+            }
+        }
+
+        return array_merge($result, ['404']);
+    }
+
+    protected function saveResponse($request, $response)
+    {
+        $this->saveFile(
+            (trim($request->decodedPath(), '/') ?: 'index').'.html',
+            $response->getContent()
+        );
+    }
+
+    protected function saveFile($filename, $content)
+    {
+        $path = $this->getCachePath($filename);
+
+        if (file_exists($path) && md5_file($path) == md5($content)) {
+            return;
+        }
+
+        if (! is_dir($dir = pathinfo($path, PATHINFO_DIRNAME))) {
+            @mkdir($dir, 0775, true);
+        }
+
+        file_put_contents($path, $content);
+    }
+
+    protected function getCachePath($path = '')
+    {
+        return public_path('storage/site-cache'.($path ? '/'.trim($path, '/') : $path));
+    }
+}
+EOT
+
+    # Register command
+    kernel="$ROOT/app/Console/Kernel.php"
+    kernelContent=$(cat "$kernel")
+    from='$this->command('
+    to=$(cat <<'EOT'
+$this->command('cache-site', function () {
+    app()->call('App\CacheSite@cache');
+});
+EOT)
+    to="$to\n$from"
+    kernelContent=${kernelContent/"$from"/"$to"}
+    echo "$kernelContent" > "$kernel"
+
+    cd "$ROOT"
+    echo "Creating website cache..."
+    php artisan cache-site
+
+    rm -rf "$cacheSiteFile"
+    git checkout "$kernel"
+}
 
 while [[ $# > 0 ]]; do
     case "$1" in
@@ -427,6 +539,14 @@ while [[ $# > 0 ]]; do
             ;;
         remove-ads)
             REMOVE_ADS=1
+            shift
+            ;;
+        cache)
+            CACHE=1
+            shift
+            ;;
+        --root-url=*)
+            ROOT_URL=`echo $1 | sed -e 's/^[^=]*=//g'`
             shift
             ;;
         clean)
@@ -480,7 +600,8 @@ update_app
 process_views
 compile_assets
 
-[[ -z $SKIP_DOCS ]] && build_docs
+[[ -z $SKIP_DOCS ]] && update_docs
 [[ -z $SKIP_API ]] && build_api
+[[ -n $CACHE ]] && cache_site
 
 echo "Completed successfully!"
