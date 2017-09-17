@@ -171,52 +171,23 @@ build_docs()
 
     cd "$ROOT"
 
-    # ------------------------------------
-    # Use "build/docs.sh" to build
-    # ------------------------------------
-    # for version in "${DOC_VERSIONS[@]}"; do
-    #     path="resources/docs/$version"
-    #     if ! [[ -d "$path" ]]; then
-    #         git clone git://github.com/laravel/docs.git --single-branch --branch=$version "$path"
-    #     fi
-    # done
-    #
-    # docs=$(cat build/docs.sh)
-    # from="/home/forge/laravel.com"
-    # to="\"$ROOT\""
-    # docs=${docs//$from/"$to"}
-    # eval "$docs"
-    # exit_if_error
-    # ------------------------------------
-
-    docsChanged=0
     for version in "${DOC_VERSIONS[@]}"; do
         path="resources/docs/$version"
         if ! [[ -d "$path" ]]; then
-            git clone git://github.com/laravel/docs.git --single-branch --branch=$version "$path"
-            docsChanged=1
+            git clone git://github.com/laravel/docs.git --single-branch --branch="$version" "$path"
+            DOCS_UPDATED+=("$version")
         else
             oldRev=$(git -C "$path" rev-parse HEAD)
-            git -C "$path" pull origin $version
+            git -C "$path" pull origin "$version"
             newRev=$(git -C "$path" rev-parse HEAD)
 
-            if [[ $oldRev == $newRev ]]; then
-                docsChanged=$(( $docsChanged | 0 ))
-            else
-                docsChanged=$(( $docsChanged | 1 ))
+            if [[ $oldRev != $newRev ]]; then
+                DOCS_UPDATED+=("$version")
             fi
         fi
     done
 
-    # TODO: Remove this 'if' if you have really known how does the page cache work.
-    #
-    # Docs page caches are the whole html contents (http response), and they
-    # should be removed after docs changed, assets file (view/js/css) changed,
-    # it may be used by a HTTP server like Nginx.
-    # if [[ $docsChanged != 0 ]]; then
-        php artisan docs:clear-cache
-        exit_if_error
-    # fi
+    php artisan docs:clear-cache
 }
 
 build_api()
@@ -409,6 +380,8 @@ process_views()
         echo "$marketingContent" > "$marketingView"
     fi
 }
+
+DOCS_UPDATED=()
 
 while [[ $# > 0 ]]; do
     case "$1" in
