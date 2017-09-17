@@ -184,7 +184,7 @@ build_docs()
     # docs=$(cat build/docs.sh)
     # from="/home/forge/laravel.com"
     # to="\"$ROOT\""
-    # docs=${docs//$from/$to}
+    # docs=${docs//$from/"$to"}
     # eval "$docs"
     # exit_if_error
     # ------------------------------------
@@ -368,7 +368,7 @@ process_views()
     # Replace page title
     if [[ -n "$TITLE" ]]; then
         original="Laravel - The PHP Framework For Web Artisans"
-        appContent=${appContent//$original/$TITLE}
+        appContent=${appContent//"$original"/"$TITLE"}
         echo "$appContent" > "$appView"
     fi
 
@@ -385,8 +385,7 @@ process_views()
     # Remove GA
     if [[ -n $REMOVE_GA ]]; then
         from="s.parentNode.insertBefore(g,s)"
-        to="// $from"
-        appContent=${appContent/$from/$to}
+        appContent=${appContent/"$from"/"// $from"}
         echo "$appContent" > "$appView"
     fi
 
@@ -395,7 +394,7 @@ process_views()
         docsView="$ROOT/resources/views/docs.blade.php"
         docsContent=$(cat "$docsView")
         carbonads=`echo "$docsContent" | grep -E "carbon\.js"`
-        docsContent=${docsContent//$carbonads}
+        docsContent=${docsContent//"$carbonads"}
         echo "$docsContent" > "$docsView"
     fi
 
