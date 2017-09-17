@@ -413,16 +413,20 @@ class CacheSite
 {
     public function cache()
     {
-        foreach ($this->getAllRouteUri() as $uri) {
-            $request = \Request::createFromBase(SymfonyRequest::create(url($uri)));
+        $allUrl = array_map('url', $this->getAllUri());
+
+        foreach ($allUrl as $url) {
+            $request = \Request::createFromBase(SymfonyRequest::create($url));
             $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
             $this->saveResponse($request, $response);
         }
+
+        $this->saveFile('sitemap.txt', implode(PHP_EOL, $allUrl));
     }
 
-    protected function getAllRouteUri()
+    protected function getAllUri()
     {
-        $result = ['404'];
+        $result = [];
 
         foreach (\Route::getRoutes() as $route) {
             if (! starts_with($route->uri(), 'docs')) {
@@ -443,13 +447,20 @@ class CacheSite
             }
         }
 
-        return $result;
+        return array_merge($result, ['404']);
     }
 
     protected function saveResponse($request, $response)
     {
-        $path = public_path('storage/site-cache/'.(trim($request->getPathInfo(), '/') ?: 'index').'.html');
-        $content = $response->getContent();
+        $this->saveFile(
+            (trim($request->decodedPath(), '/') ?: 'index').'.html',
+            $response->getContent()
+        );
+    }
+
+    protected function saveFile($filename, $content)
+    {
+        $path = $this->getCachePath($filename);
 
         if (file_exists($path) && md5_file($path) == md5($content)) {
             return;
@@ -460,6 +471,11 @@ class CacheSite
         }
 
         file_put_contents($path, $content);
+    }
+
+    protected function getCachePath($path = '')
+    {
+        return public_path('storage/site-cache'.($path ? '/'.trim($path, '/') : $path));
     }
 }
 EOT
