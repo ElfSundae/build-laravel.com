@@ -47,7 +47,7 @@ Usage: sync-laravel.com <webroot> [<options>]
 Options:
     upgrade             Upgrade this script
     status              Check status of webroot and docs
-    skip-docs           Skip building docs
+    skip-docs           Skip updating docs
     skip-api            Skip building api documentation
     local-cdn           Download static files from CDN, and host them locally
     --font-format=FMT   Use FMT when downloading Google Fonts
@@ -58,6 +58,8 @@ Options:
     --gaid=GID          Replace Google Analytics tracking ID with GID
     remove-ga           Remove Google Analytics
     remove-ads          Remove advertisements
+    cache               Create website cache
+    --root-url=URL      Set the root URL of website
     clean               Clean webroot
     -f, --force         Force build
     --version           Print version of this script
