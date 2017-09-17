@@ -289,7 +289,7 @@ cdn_url()
     echo "$text"
 }
 
-process_source()
+process_views()
 {
     appView="$ROOT/resources/views/app.blade.php"
     appContent=$(cat "$appView")
@@ -486,7 +486,7 @@ fi
 
 update_app
 
-process_source
+process_views
 compile_assets
 
 [[ -z $SKIP_DOCS ]] && build_docs
