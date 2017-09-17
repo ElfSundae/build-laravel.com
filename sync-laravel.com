@@ -222,9 +222,9 @@ build_api()
     else
         git -C "laravel" reset --hard
         git -C "laravel" clean -dfx
-        oldRev=$(git -C "laravel" rev-parse HEAD)
-        git -C "laravel" pull
-        newRev=$(git -C "laravel" rev-parse HEAD)
+        oldRev=$(git -C "laravel" log -1 --format="%h" --all)
+        git -C "laravel" fetch
+        newRev=$(git -C "laravel" log -1 --format="%h" --all)
 
         if [[ -d "$ROOT/public/api" ]] && [[ $oldRev == $newRev ]] && [[ -z $FORCE ]]; then
             return
