@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="v1.13 - https://github.com/ElfSundae/sync-laravel.com"
+VER="v1.14 - https://github.com/ElfSundae/sync-laravel.com"
 
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
@@ -44,7 +44,7 @@ exit_if_error()
 exit_with_error()
 {
     if [[ $# > 0 ]]; then
-        echo "$@\n"
+        echo -e "$@\n"
     fi
 
     echo "Use -h to see usage"
@@ -482,10 +482,11 @@ EOT
 $this->command('cache-site', function () {
     app()->call('App\CacheSite@cache');
 });
-EOT)
+EOT
+)
     to="$to\n$from"
     kernelContent=${kernelContent/"$from"/"$to"}
-    echo "$kernelContent" > "$kernel"
+    echo -e "$kernelContent" > "$kernel"
 
     cd "$ROOT"
     echo "Creating website cache..."
