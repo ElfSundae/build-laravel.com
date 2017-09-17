@@ -241,8 +241,10 @@ build_api()
     rm -rf cache
 }
 
-create_cache()
+cache_site()
 {
+    cd "$ROOT"
+
 
 }
 
@@ -510,6 +512,6 @@ compile_assets
 
 [[ -z $SKIP_DOCS ]] && build_docs
 [[ -z $SKIP_API ]] && build_api
-[[ -n $CACHE ]] && create_cache
+[[ -n $CACHE ]] && cache_site
 
 echo "Completed successfully!"
