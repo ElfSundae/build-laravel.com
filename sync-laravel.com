@@ -95,6 +95,23 @@ check_status()
     done
 }
 
+process_source()
+{
+    httpKernel="$ROOT/app/Http/Kernel.php"
+    httpKernelContent=$(cat "$httpKernel")
+    removeLines=(
+        "\App\Http\Middleware\EncryptCookies::class,"
+        "\Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,"
+        "\Illuminate\Session\Middleware\StartSession::class,"
+        "\Illuminate\View\Middleware\ShareErrorsFromSession::class,"
+        "\App\Http\Middleware\VerifyCsrfToken::class,"
+    )
+    for line in "${removeLines[@]}"; do
+        httpKernelContent=${httpKernelContent/"$line"/"// $line"}
+    done
+    echo "$httpKernelContent" > "$httpKernel"
+}
+
 update_app()
 {
     if ! [[ -d "$ROOT" ]]; then
@@ -108,6 +125,8 @@ update_app()
     ROOT=$(fullpath "$ROOT")
 
     cd "$ROOT"
+
+    process_source
 
     echo "Installing PHP packages..."
     composer install --no-dev --no-interaction -q
