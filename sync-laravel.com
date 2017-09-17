@@ -16,7 +16,7 @@ Usage: $script <webroot> [<options>]
 Options:
     upgrade             Upgrade this script
     status              Check status of webroot and docs
-    skip-docs           Skip building docs
+    skip-docs           Skip updating docs
     skip-api            Skip building api documentation
     local-cdn           Download static files from CDN, and host them locally
     --font-format=FMT   Use FMT when downloading Google Fonts
@@ -181,7 +181,7 @@ compile_assets()
     exit_if_error
 }
 
-build_docs()
+update_docs()
 {
     echo "Updating docs..."
 
@@ -608,7 +608,7 @@ update_app
 process_views
 compile_assets
 
-[[ -z $SKIP_DOCS ]] && build_docs
+[[ -z $SKIP_DOCS ]] && update_docs
 [[ -z $SKIP_API ]] && build_api
 [[ -n $CACHE ]] && cache_site
 
