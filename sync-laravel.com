@@ -210,7 +210,7 @@ build_api()
         git -C "laravel" pull
         newRev=$(git -C "laravel" rev-parse HEAD)
 
-        if [[ $oldRev == $newRev ]] && [[ -z $FORCE ]]; then
+        if [[ -d "$ROOT/public/api" ]] && [[ $oldRev == $newRev ]] && [[ -z $FORCE ]]; then
             return
         fi
     fi
