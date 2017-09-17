@@ -208,7 +208,7 @@ update_docs()
 
 build_api()
 {
-    echo "Building API..."
+    echo "Building API documentation..."
 
     sami=${ROOT}/build/sami
 
