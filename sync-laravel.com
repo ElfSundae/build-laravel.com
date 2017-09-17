@@ -206,9 +206,6 @@ build_api()
     sami=${ROOT}/build/sami
 
     cd "$sami"
-    composer update
-    exit_if_error
-    git checkout composer.lock
 
     if ! [[ -d "laravel" ]]; then
         git clone git://github.com/laravel/framework.git laravel
@@ -223,6 +220,10 @@ build_api()
             return
         fi
     fi
+
+    composer update
+    exit_if_error
+    git checkout composer.lock
 
     rm -rf build
     rm -rf cache
