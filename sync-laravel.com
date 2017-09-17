@@ -191,15 +191,8 @@ update_docs()
         path="resources/docs/$version"
         if ! [[ -d "$path" ]]; then
             git clone git://github.com/laravel/docs.git --single-branch --branch="$version" "$path"
-            DOCS_UPDATED+=("$version")
         else
-            oldRev=$(git -C "$path" rev-parse HEAD)
             git -C "$path" pull origin "$version"
-            newRev=$(git -C "$path" rev-parse HEAD)
-
-            if [[ $oldRev != $newRev ]]; then
-                DOCS_UPDATED+=("$version")
-            fi
         fi
     done
 
@@ -500,8 +493,6 @@ EOT)
     rm -rf "$cacheSiteFile"
     git checkout "$kernel"
 }
-
-DOCS_UPDATED=()
 
 while [[ $# > 0 ]]; do
     case "$1" in
