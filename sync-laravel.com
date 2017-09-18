@@ -560,6 +560,7 @@ while [[ $# > 0 ]]; do
             ;;
         --root-url=*)
             ROOT_URL=`echo $1 | sed -e 's/^[^=]*=//g'`
+            ROOT_URL=${ROOT_URL%/}
             shift
             ;;
         clean)
