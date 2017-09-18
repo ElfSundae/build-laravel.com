@@ -511,6 +511,7 @@ EOT
 
     cd "$ROOT"
     echo "Creating website cache..."
+    php artisan cache:clear
     php artisan cache-site
 
     rm -rf "$cacheSiteFile"
