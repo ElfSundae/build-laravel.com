@@ -44,7 +44,7 @@ exit_if_error()
 exit_with_error()
 {
     if [[ $# > 0 ]]; then
-        echo -e "$@\n"
+        echo "$@"
     fi
 
     echo "Use -h to see usage"
@@ -484,9 +484,8 @@ $this->command('cache-site', function () {
 });
 EOT
 )
-    to="$to\n$from"
-    kernelContent=${kernelContent/"$from"/"$to"}
-    echo -e "$kernelContent" > "$kernel"
+    kernelContent=${kernelContent/"$from"/"$to $from"}
+    echo "$kernelContent" > "$kernel"
 
     cd "$ROOT"
     echo "Creating website cache..."
