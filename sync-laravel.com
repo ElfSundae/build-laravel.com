@@ -192,11 +192,20 @@ update_docs()
         if ! [[ -d "$path" ]]; then
             git clone git://github.com/laravel/docs.git --single-branch --branch="$version" "$path"
         else
+            git -C "$path" reset --hard
             git -C "$path" pull origin "$version"
         fi
     done
 
-    php artisan docs:clear-cache
+    # Replace laravel.com URL in docs
+    find resources/docs -name "*.md" \
+        -exec sed -i '' "s#https\{0,1\}://laravel.com/#${ROOT_URL}/#g" "{}" \;
+
+    # Clear parsed markdown to make new URL work
+    php artisan cache:clear
+
+    # This maybe legacy code, see CacheResponse middleware
+    php artisan docs:clear-cache -q
 }
 
 build_api()
