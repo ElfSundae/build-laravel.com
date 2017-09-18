@@ -6,7 +6,7 @@ DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
 usage()
 {
-    script=$(basename $0)
+    script=$(basename "$0")
     cat <<EOT
 Sync local mirror of laravel.com website.
 $VER
