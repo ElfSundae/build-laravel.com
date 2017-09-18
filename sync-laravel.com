@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="v1.15 - https://github.com/ElfSundae/sync-laravel.com"
+VER="v1.16 - https://github.com/ElfSundae/sync-laravel.com"
 
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
