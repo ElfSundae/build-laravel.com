@@ -197,9 +197,11 @@ update_docs()
         fi
     done
 
-    # Replace laravel.com URL in docs
+    # Replace laravel.com URL in docs.
+    # `sed -i` is different in macOS and GNU system.
     find resources/docs -name "*.md" \
-        -exec sed -i '' "s#https\{0,1\}://laravel.com/#${ROOT_URL}/#g" "{}" \;
+        -exec sed -i.bak "s#https\{0,1\}://laravel.com/#${ROOT_URL}/#g" "{}" \;
+    find resources/docs -name "*.md.bak" -exec rm -rf "{}" \;
 
     # Clear parsed markdown to make new URL work
     php artisan cache:clear
