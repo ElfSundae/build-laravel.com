@@ -16,19 +16,19 @@ Usage: $script <webroot> [<options>]
 Options:
     upgrade             Upgrade this script
     status              Check status of webroot and docs
+    --root-url=URL      Set the root URL of website
     skip-docs           Skip updating docs
     skip-api            Skip building api documentation
     local-cdn           Download static files from CDN, and host them locally
     --font-format=FMT   Use FMT when downloading Google Fonts
                         Supported: eot, ttf, svg, woff, woff2
-                        Default format is woff2
+                        Default is woff2
     --title=TXT         Replace page title to TXT
     china-cdn           Replace CDN hosts with China mirrors
     --gaid=GID          Replace Google Analytics tracking ID with GID
     remove-ga           Remove Google Analytics
     remove-ads          Remove advertisements
     cache               Create website cache
-    --root-url=URL      Set the root URL of website
     clean               Clean webroot
     -f, --force         Force build
     --version           Print version of this script
@@ -530,6 +530,11 @@ while [[ $# > 0 ]]; do
             CHECK_STATUS=1
             shift
             ;;
+        --root-url=*)
+            ROOT_URL=`echo $1 | sed -e 's/^[^=]*=//g'`
+            ROOT_URL=${ROOT_URL%/}
+            shift
+            ;;
         skip-docs)
             SKIP_DOCS=1
             shift
@@ -568,11 +573,6 @@ while [[ $# > 0 ]]; do
             ;;
         cache)
             CACHE=1
-            shift
-            ;;
-        --root-url=*)
-            ROOT_URL=`echo $1 | sed -e 's/^[^=]*=//g'`
-            ROOT_URL=${ROOT_URL%/}
             shift
             ;;
         clean)
