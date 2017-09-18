@@ -99,6 +99,7 @@ check_status()
 
 process_source()
 {
+    # Remove unnecessary middlewares
     httpKernel="$ROOT/app/Http/Kernel.php"
     httpKernelContent=$(cat "$httpKernel")
     removeLines=(
@@ -198,7 +199,7 @@ update_docs()
     done
 
     # Replace laravel.com URL in docs.
-    # `sed -i` is different in macOS and GNU system.
+    # NOTE: `sed -i` is different in macOS and GNU system.
     find resources/docs -name "*.md" \
         -exec sed -i.bak "s#https\{0,1\}://laravel.com/#${ROOT_URL}/#g" "{}" \;
     find resources/docs -name "*.md.bak" -exec rm -rf "{}" \;
@@ -207,7 +208,7 @@ update_docs()
     php artisan cache:clear
 
     # This maybe legacy code, see CacheResponse middleware
-    php artisan docs:clear-cache -q
+    # php artisan docs:clear-cache
 }
 
 build_api()
@@ -263,12 +264,12 @@ download()
     url=$1
     shift
 
-    extension="__auto__"
+    extension="auto"
     if [[ -n $1 ]]; then
         extension=.$1
         shift
     fi
-    if [[ $extension == "__auto__" ]]; then
+    if [[ $extension == "auto" ]]; then
         extension=.${url##*.}
     fi
 
