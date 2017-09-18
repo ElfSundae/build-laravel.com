@@ -44,7 +44,7 @@ exit_if_error()
 exit_with_error()
 {
     if [[ $# > 0 ]]; then
-        echo -e "$@\n"
+        echo "$@"
     fi
 
     echo "Use -h to see usage"
@@ -407,18 +407,20 @@ class CacheSite
 {
     public function cache()
     {
-        $allUrl = array_map('url', $this->getAllUri());
+        $routeUrl = array_map('url', $this->getRoutePath());
 
-        foreach ($allUrl as $url) {
+        foreach ($routeUrl as $url) {
             $request = \Request::createFromBase(SymfonyRequest::create($url));
             $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
             $this->saveResponse($request, $response);
         }
 
-        $this->saveFile('sitemap.txt', implode(PHP_EOL, $allUrl));
+        $this->saveFile('sitemap.txt', implode(PHP_EOL, array_merge(
+            $routeUrl, $this->getApiUrl()
+        )));
     }
 
-    protected function getAllUri()
+    protected function getRoutePath()
     {
         $result = [];
 
@@ -442,6 +444,17 @@ class CacheSite
         }
 
         return array_merge($result, ['404']);
+    }
+
+    protected function getApiUrl()
+    {
+        $result = [];
+
+        foreach (\File::directories(public_path('api')) as $dir) {
+            $result[] = url(Str::replaceFirst(public_path(), '', $dir)).'/';
+        }
+
+        return $result;
     }
 
     protected function saveResponse($request, $response)
@@ -477,16 +490,15 @@ EOT
     # Register command
     kernel="$ROOT/app/Console/Kernel.php"
     kernelContent=$(cat "$kernel")
-    from='$this->command('
+    from="\$this->command('docs:index'"
     to=$(cat <<'EOT'
 $this->command('cache-site', function () {
     app()->call('App\CacheSite@cache');
 });
 EOT
 )
-    to="$to\n$from"
-    kernelContent=${kernelContent/"$from"/"$to"}
-    echo -e "$kernelContent" > "$kernel"
+    kernelContent=${kernelContent/"$from"/"$to $from"}
+    echo "$kernelContent" > "$kernel"
 
     cd "$ROOT"
     echo "Creating website cache..."
