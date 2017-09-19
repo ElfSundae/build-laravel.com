@@ -215,22 +215,23 @@ build_api()
 {
     echo "Building API documentation..."
 
-    sami=${ROOT}/build/sami
+    sami=$ROOT/build/sami
 
     cd "$sami"
 
-    if ! [[ -d "laravel" ]]; then
+    if ! [[ -d laravel ]]; then
         git clone git://github.com/laravel/framework.git laravel
     else
-        git -C "laravel" reset --hard
-        git -C "laravel" clean -dfx
-        oldRev=$(git -C "laravel" log -1 --format="%h" --all)
-        git -C "laravel" fetch
-        newRev=$(git -C "laravel" log -1 --format="%h" --all)
+        git -C laravel fetch
+    fi
 
-        if [[ -d "$ROOT/public/api" ]] && [[ $oldRev == $newRev ]] && [[ -z $FORCE ]]; then
-            return
-        fi
+    apiDir=$ROOT/public/api
+    apiVerFile=$apiDir/version.txt
+    apiOldVer=`cat "$apiVerFile" 2>/dev/null`
+    apiVer=$(git -C "laravel" log -1 --format="%H" --all)
+
+    if [[ $apiOldVer == $apiVer ]] && [[ -z $FORCE ]]; then
+        return
     fi
 
     composer update
@@ -242,8 +243,9 @@ build_api()
     ./vendor/bin/sami.php update sami.php
     exit_if_error
 
-    mkdir -p "$ROOT/public/api"
-    cp -af build/* "$ROOT/public/api"
+    mkdir -p "$apiDir"
+    cp -af build/* "$apiDir"
+    echo "$apiVer" > "$apiVerFile"
     rm -rf build
     rm -rf cache
 }
@@ -514,7 +516,7 @@ EOT
 
     cd "$ROOT"
     echo "Creating website cache..."
-    php artisan cache:clear
+    php artisan cache:clear -q
     php artisan cache-site
 
     rm -rf "$cacheSiteFile"
