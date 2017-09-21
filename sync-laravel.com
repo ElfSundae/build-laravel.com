@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="v1.17 - https://github.com/ElfSundae/sync-laravel.com"
+VER="v1.18 - https://github.com/ElfSundae/sync-laravel.com"
 
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
@@ -16,9 +16,11 @@ Usage: $script <webroot> [<options>]
 Options:
     upgrade             Upgrade this script
     status              Check status of webroot and docs
-    --root-url=URL      Set the root URL of website
+    --root-url=URL      Set the root URL of website, APP_URL environment variable
     skip-docs           Skip updating docs
     skip-api            Skip building api documentation
+    skip-update-app     Skip updating app: pull repository, install PHP and Node
+                        packages, process views, compile assets
     local-cdn           Download static files from CDN, and host them locally
     --font-format=FMT   Use FMT when downloading Google Fonts
                         Supported: eot, ttf, svg, woff, woff2
@@ -407,9 +409,16 @@ process_views()
 
 cache_site()
 {
-    cacheSiteFile=$ROOT/app/CacheSite.php
+    echo "Creating website cache..."
 
-    cat <<'EOT' > "$cacheSiteFile"
+    cd "$ROOT"
+
+    # Add "cache-site" artisan command if it is not existed.
+    php artisan cache-site -h &>/dev/null
+    if [[ $? != 0 ]]; then
+        cacheSiteFile=$ROOT/app/CacheSite.php
+
+        cat <<'EOT' > "$cacheSiteFile"
 <?php
 
 namespace App;
@@ -501,26 +510,27 @@ class CacheSite
 }
 EOT
 
-    # Register command
-    kernel="$ROOT/app/Console/Kernel.php"
-    kernelContent=$(cat "$kernel")
-    from="\$this->command('docs:index'"
-    to=$(cat <<'EOT'
+        # Register command
+        kernel="$ROOT/app/Console/Kernel.php"
+        kernelContent=$(cat "$kernel")
+        from="\$this->command('docs:index'"
+        to=$(cat <<'EOT'
 $this->command('cache-site', function () {
     app()->call('App\CacheSite@cache');
 });
 EOT
 )
-    kernelContent=${kernelContent/"$from"/"$to $from"}
-    echo "$kernelContent" > "$kernel"
+        kernelContent=${kernelContent/"$from"/"$to $from"}
+        echo "$kernelContent" > "$kernel"
+    fi
 
-    cd "$ROOT"
-    echo "Creating website cache..."
     php artisan cache:clear -q
     php artisan cache-site
 
-    rm -rf "$cacheSiteFile"
-    git checkout "$kernel"
+    if [[ -n "$cacheSiteFile" ]]; then
+        rm -rf "$cacheSiteFile"
+        git checkout "$kernel"
+    fi
 }
 
 while [[ $# > 0 ]]; do
@@ -544,6 +554,10 @@ while [[ $# > 0 ]]; do
             ;;
         skip-api)
             SKIP_API=1
+            shift
+            ;;
+        skip-update-app)
+            SKIP_UPDATE_APP=1
             shift
             ;;
         local-cdn)
@@ -612,6 +626,8 @@ fi
 
 if [[ -z "$ROOT" ]]; then
     exit_with_error "Missing argument: webroot path"
+elif [[ -d "$ROOT" ]]; then
+    ROOT=$(fullpath "$ROOT")
 fi
 
 if [[ -n $CHECK_STATUS ]]; then
@@ -624,10 +640,15 @@ if [[ -n $CLEAN_REPO ]]; then
     exit 0
 fi
 
-update_app
+if [[ -z $SKIP_UPDATE_APP ]]; then
+    update_app
+    process_views
+    compile_assets
+fi
 
-process_views
-compile_assets
+if ! [[ -d "$ROOT" ]]; then
+    exit_with_error "$ROOT does not exist."
+fi
 
 [[ -z $SKIP_DOCS ]] && update_docs
 [[ -z $SKIP_API ]] && build_api
