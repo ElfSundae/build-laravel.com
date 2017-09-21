@@ -47,9 +47,11 @@ Usage: sync-laravel.com <webroot> [<options>]
 Options:
     upgrade             Upgrade this script
     status              Check status of webroot and docs
-    --root-url=URL      Set the root URL of website
+    --root-url=URL      Set the root URL of website, APP_URL environment variable
     skip-docs           Skip updating docs
     skip-api            Skip building api documentation
+    skip-update-app     Skip updating app: pull repository, install PHP and Node
+                        packages, process views, compile assets
     local-cdn           Download static files from CDN, and host them locally
     --font-format=FMT   Use FMT when downloading Google Fonts
                         Supported: eot, ttf, svg, woff, woff2
