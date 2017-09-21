@@ -409,8 +409,12 @@ process_views()
 
 cache_site()
 {
+    echo "Creating website cache..."
+
+    cd "$ROOT"
+
     # Add "cache-site" artisan command if it is not existed.
-    php artisan cache-site -h
+    php artisan cache-site -h &>/dev/null
     if [[ $? != 0 ]]; then
         cacheSiteFile=$ROOT/app/CacheSite.php
 
@@ -520,8 +524,6 @@ EOT
         echo "$kernelContent" > "$kernel"
     fi
 
-    cd "$ROOT"
-    echo "Creating website cache..."
     php artisan cache:clear -q
     php artisan cache-site
 
