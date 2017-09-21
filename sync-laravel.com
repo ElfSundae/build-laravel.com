@@ -612,6 +612,8 @@ fi
 
 if [[ -z "$ROOT" ]]; then
     exit_with_error "Missing argument: webroot path"
+elif [[ -d "$ROOT" ]]; then
+    ROOT=$(fullpath "$ROOT")
 fi
 
 if [[ -n $CHECK_STATUS ]]; then
