@@ -16,9 +16,11 @@ Usage: $script <webroot> [<options>]
 Options:
     upgrade             Upgrade this script
     status              Check status of webroot and docs
-    --root-url=URL      Set the root URL of website
+    --root-url=URL      Set the root URL of website, APP_URL environment variable
     skip-docs           Skip updating docs
     skip-api            Skip building api documentation
+    skip-update-app     Skip updating app: pull repository, install PHP and Node
+                        packages, process views, compile assets
     local-cdn           Download static files from CDN, and host them locally
     --font-format=FMT   Use FMT when downloading Google Fonts
                         Supported: eot, ttf, svg, woff, woff2
@@ -546,6 +548,10 @@ while [[ $# > 0 ]]; do
             SKIP_API=1
             shift
             ;;
+        skip-update-app)
+            SKIP_UPDATE_APP=1
+            shift
+            ;;
         local-cdn)
             LOCAL_CDN=1
             shift
@@ -626,10 +632,15 @@ if [[ -n $CLEAN_REPO ]]; then
     exit 0
 fi
 
-update_app
+if [[ -z $SKIP_UPDATE_APP ]]; then
+    update_app
+    process_views
+    compile_assets
+fi
 
-process_views
-compile_assets
+if ! [[ -d "$ROOT" ]]; then
+    exit_with_error "$ROOT does not exist."
+fi
 
 [[ -z $SKIP_DOCS ]] && update_docs
 [[ -z $SKIP_API ]] && build_api
