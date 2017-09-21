@@ -409,9 +409,12 @@ process_views()
 
 cache_site()
 {
-    cacheSiteFile=$ROOT/app/CacheSite.php
+    # Add "cache-site" artisan command if it is not existed.
+    php artisan cache-site -h
+    if [[ $? != 0 ]]; then
+        cacheSiteFile=$ROOT/app/CacheSite.php
 
-    cat <<'EOT' > "$cacheSiteFile"
+        cat <<'EOT' > "$cacheSiteFile"
 <?php
 
 namespace App;
@@ -503,26 +506,29 @@ class CacheSite
 }
 EOT
 
-    # Register command
-    kernel="$ROOT/app/Console/Kernel.php"
-    kernelContent=$(cat "$kernel")
-    from="\$this->command('docs:index'"
-    to=$(cat <<'EOT'
+        # Register command
+        kernel="$ROOT/app/Console/Kernel.php"
+        kernelContent=$(cat "$kernel")
+        from="\$this->command('docs:index'"
+        to=$(cat <<'EOT'
 $this->command('cache-site', function () {
     app()->call('App\CacheSite@cache');
 });
 EOT
 )
-    kernelContent=${kernelContent/"$from"/"$to $from"}
-    echo "$kernelContent" > "$kernel"
+        kernelContent=${kernelContent/"$from"/"$to $from"}
+        echo "$kernelContent" > "$kernel"
+    fi
 
     cd "$ROOT"
     echo "Creating website cache..."
     php artisan cache:clear -q
     php artisan cache-site
 
-    rm -rf "$cacheSiteFile"
-    git checkout "$kernel"
+    if [[ -n "$cacheSiteFile" ]]; then
+        rm -rf "$cacheSiteFile"
+        git checkout "$kernel"
+    fi
 }
 
 while [[ $# > 0 ]]; do
