@@ -135,6 +135,7 @@ update_app()
     process_source
 
     echo "Installing PHP packages..."
+    rm -rf bootstrap/cache/*
     composer install --no-dev --no-interaction -q
     exit_if_error
 
