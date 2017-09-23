@@ -196,6 +196,7 @@ update_docs()
             git clone git://github.com/laravel/docs.git --single-branch --branch="$version" "$path"
         else
             git -C "$path" reset --hard -q
+            git -C "$path" clean -dfx -q
             git -C "$path" pull origin "$version"
         fi
     done
