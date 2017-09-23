@@ -232,7 +232,6 @@ build_api()
 
     composer update
     exit_if_error
-    git checkout composer.lock
 
     rm -rf build
     rm -rf cache
