@@ -215,6 +215,8 @@ build_api()
     if ! [[ -d laravel ]]; then
         git clone git://github.com/laravel/framework.git laravel
     else
+        git -C laravel reset --hard -q
+        git -C laravel clean -dfx
         git -C laravel fetch
     fi
 
