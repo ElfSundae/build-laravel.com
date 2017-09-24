@@ -425,9 +425,7 @@ class CacheSite
         $routeUrls = array_map('url', $this->getRoutePaths());
 
         foreach ($routeUrls as $url) {
-            $request = Request::createFromBase(SymfonyRequest::create($url));
-            $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
-            $this->saveResponse($request, $response);
+            $this->saveContentForUrl($url);
         }
         echo 'Cached '.count($routeUrls).' pages.'.PHP_EOL;
 
@@ -476,6 +474,13 @@ class CacheSite
         return array_map(function ($version) {
             return url("api/$version/");
         }, array_keys(Documentation::getDocVersions()));
+    }
+
+    protected function saveContentForUrl($url)
+    {
+        $request = Request::createFromBase(SymfonyRequest::create($url));
+        $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
+        $this->saveResponse($request, $response);
     }
 
     protected function saveResponse($request, $response)
