@@ -408,9 +408,9 @@ cachesite_content()
 
 namespace App;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Request;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 class CacheSite
@@ -432,7 +432,7 @@ class CacheSite
         $this->saveFile('sitemap.txt', implode(PHP_EOL, array_merge(
             $routeUrls, $this->getApiUrls()
         )));
-        echo "Sitemap: ".$this->getCacheUrl('sitemap.txt').PHP_EOL;
+        echo 'Sitemap: '.$this->getCacheUrl('sitemap.txt').PHP_EOL;
     }
 
     protected function getRoutePaths()
