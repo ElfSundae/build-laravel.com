@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="v1.18 - https://github.com/ElfSundae/sync-laravel.com"
+VER="v1.19 - https://github.com/ElfSundae/sync-laravel.com"
 
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
@@ -232,9 +232,9 @@ build_api()
     fi
 
     composer require sami/sami:~4.0 --prefer-stable --prefer-dist
+    exit_if_error
     git checkout composer.json
     git checkout composer.lock &>/dev/null
-    exit_if_error
 
     rm -rf build
     rm -rf cache
