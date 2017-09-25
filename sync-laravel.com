@@ -410,6 +410,7 @@ namespace App;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Artisan;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
@@ -424,15 +425,9 @@ class CacheSite
 
         $routeUrls = array_map('url', $this->getRoutePaths());
 
-        foreach ($routeUrls as $url) {
-            $this->saveContentForUrl($url);
-        }
-        echo 'Cached '.count($routeUrls).' pages.'.PHP_EOL;
+        $this->saveResponseForUrls($routeUrls);
 
-        $this->saveFile('sitemap.txt', implode(PHP_EOL, array_merge(
-            $routeUrls, $this->getApiUrls()
-        )));
-        echo 'Sitemap: '.$this->getCacheUrl('sitemap.txt').PHP_EOL;
+        $this->saveSitemap(array_merge($routeUrls, $this->getApiUrls()));
     }
 
     protected function getRoutePaths()
@@ -476,19 +471,33 @@ class CacheSite
         }, array_keys(Documentation::getDocVersions()));
     }
 
-    protected function saveContentForUrl($url)
+    protected function saveResponseForUrls($urls)
     {
-        $request = Request::createFromBase(SymfonyRequest::create($url));
-        $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
-        $this->saveResponse($request, $response);
+        $currentRequest = app('request');
+
+        foreach ($urls as $url) {
+            $request = Request::createFromBase(SymfonyRequest::create($url));
+            $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
+
+            // Restore current request
+            app()->instance('request', $currentRequest);
+            Facade::clearResolvedInstance('request');
+
+            // Note: use $url (not $request->path()) to get cache path
+            $path = urldecode(parse_url($url, PHP_URL_PATH) ?: '/');
+            $filename = (trim($path, '/') ?: 'index').'.html';
+
+            $this->saveFile($filename, $response->getContent());
+        }
+
+        echo 'Cached '.count($urls).' pages.'.PHP_EOL;
     }
 
-    protected function saveResponse($request, $response)
+    protected function saveSitemap($urls)
     {
-        $this->saveFile(
-            (trim($request->decodedPath(), '/') ?: 'index').'.html',
-            $response->getContent()
-        );
+        $filename = 'sitemap.txt';
+        $this->saveFile($filename, implode(PHP_EOL, $urls));
+        echo 'Sitemap: '.$this->getCacheUrl($filename).PHP_EOL;
     }
 
     protected function saveFile($filename, $content)
@@ -510,12 +519,19 @@ class CacheSite
 
     protected function getCachePath($path = '')
     {
-        return public_path(static::CACHE_DIR.($path ? '/'.trim($path, '/') : $path));
+        return public_path(static::CACHE_DIR.$this->prefixedPath($path));
     }
 
     protected function getCacheUrl($path = '')
     {
-        return url(static::CACHE_DIR.($path ? '/'.trim($path, '/') : $path));
+        return url(static::CACHE_DIR.$this->prefixedPath($path));
+    }
+
+    protected function prefixedPath($path = '')
+    {
+        $path = trim($path, '/');
+
+        return $path ? '/'.$path : '';
     }
 }
 
