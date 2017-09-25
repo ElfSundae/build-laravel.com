@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="v1.18 - https://github.com/ElfSundae/sync-laravel.com"
+VER="v1.19 - https://github.com/ElfSundae/sync-laravel.com"
 
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
@@ -135,6 +135,7 @@ update_app()
     process_source
 
     echo "Installing PHP packages..."
+    rm -rf bootstrap/cache/*
     composer install --no-dev --no-interaction -q
     exit_if_error
 
@@ -196,21 +197,13 @@ update_docs()
             git clone git://github.com/laravel/docs.git --single-branch --branch="$version" "$path"
         else
             git -C "$path" reset --hard -q
+            git -C "$path" clean -dfx -q
             git -C "$path" pull origin "$version"
         fi
     done
 
-    # Replace laravel.com URL in docs.
-    # NOTE: `sed -i` is different in macOS and GNU system.
-    find resources/docs -name "*.md" \
-        -exec sed -i.bak "s#https\{0,1\}://laravel.com/#${ROOT_URL}/#g" "{}" \;
-    find resources/docs -name "*.md.bak" -exec rm -rf "{}" \;
-
-    # Clear parsed markdown to make new URL work
-    php artisan cache:clear
-
     # This maybe legacy code, see CacheResponse middleware
-    # php artisan docs:clear-cache
+    php artisan docs:clear-cache
 }
 
 build_api()
@@ -224,6 +217,8 @@ build_api()
     if ! [[ -d laravel ]]; then
         git clone git://github.com/laravel/framework.git laravel
     else
+        git -C laravel reset --hard -q
+        git -C laravel clean -dfx
         git -C laravel fetch
     fi
 
@@ -236,9 +231,10 @@ build_api()
         return
     fi
 
-    composer update
+    composer require sami/sami:~4.0 --prefer-stable --prefer-dist
     exit_if_error
-    git checkout composer.lock
+    git checkout composer.json
+    git checkout composer.lock &>/dev/null
 
     rm -rf build
     rm -rf cache
@@ -407,91 +403,111 @@ process_views()
     fi
 }
 
-cache_site()
+cachesite_content()
 {
-    echo "Creating website cache..."
-
-    cd "$ROOT"
-
-    # Add "cache-site" artisan command if it is not existed.
-    php artisan cache-site -h &>/dev/null
-    if [[ $? != 0 ]]; then
-        cacheSiteFile=$ROOT/app/CacheSite.php
-
-        cat <<'EOT' > "$cacheSiteFile"
+    cat <<'EOF'
 <?php
 
 namespace App;
 
-use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\Facades\Artisan;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 class CacheSite
 {
+    const CACHE_DIR = 'storage/site-cache';
+
     public function cache()
     {
-        $routeUrl = array_map('url', $this->getRoutePath());
+        // Clear the parsed doc markdown cache
+        Artisan::call('cache:clear');
 
-        foreach ($routeUrl as $url) {
-            $request = \Request::createFromBase(SymfonyRequest::create($url));
-            $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
-            $this->saveResponse($request, $response);
-        }
+        $routeUrls = array_map('url', $this->getRoutePaths());
 
-        $this->saveFile('sitemap.txt', implode(PHP_EOL, array_merge(
-            $routeUrl, $this->getApiUrl()
-        )));
+        $this->saveResponseForUrls($routeUrls);
+
+        $this->saveSitemap(array_merge($routeUrls, $this->getApiUrls()));
     }
 
-    protected function getRoutePath()
+    protected function getRoutePaths()
     {
-        $result = [];
+        $routes = [];
 
-        foreach (\Route::getRoutes() as $route) {
-            if (! starts_with($route->uri(), 'docs')) {
-                $result[] = $route->uri();
+        foreach (Route::getRoutes() as $route) {
+            if (! preg_match('#^([a-z-_]+/)?docs#i', $route->uri())) {
+                $routes[] = $route->uri();
             }
         }
 
-        $resourcePath = resource_path();
-        foreach (\File::directories($resourcePath.'/docs') as $dir) {
-            $result[] = Str::replaceFirst($resourcePath.'/', '', $dir);
+        foreach (Documentation::getDocVersions() as $version => $display) {
+            $routes[] = "docs/$version";
 
-            if ($files = glob($dir.'/*.md')) {
-                foreach($files as $file) {
-                    $file = Str::replaceFirst($resourcePath.'/', '', $file);
-                    $file = Str::replaceLast('.md', '', $file);
-                    $result[] = $file;
-                }
+            foreach (glob(resource_path("docs/$version/*.md")) ?: [] as $path) {
+                $routes[] = "docs/$version/".pathinfo($path, PATHINFO_FILENAME);
             }
         }
 
-        return array_merge($result, ['404']);
-    }
+        $routes[] = '404';
 
-    protected function getApiUrl()
-    {
-        $result = [];
+        $result = $routes;
 
-        foreach (\File::directories(public_path('api')) as $dir) {
-            $result[] = url(Str::replaceFirst(public_path(), '', $dir)).'/';
+        foreach (config('locales', []) as $locale) {
+            $result = array_merge(
+                $result,
+                array_map(function ($path) use ($locale) {
+                    return rtrim('/'.$locale.'/'.trim($path, '/'), '/');
+                }, $routes)
+            );
         }
 
         return $result;
     }
 
-    protected function saveResponse($request, $response)
+    protected function getApiUrls()
     {
-        $this->saveFile(
-            (trim($request->decodedPath(), '/') ?: 'index').'.html',
-            $response->getContent()
-        );
+        return array_map(function ($version) {
+            return url("api/$version/");
+        }, array_keys(Documentation::getDocVersions()));
+    }
+
+    protected function saveResponseForUrls($urls)
+    {
+        $currentRequest = app('request');
+
+        foreach ($urls as $url) {
+            $request = Request::createFromBase(SymfonyRequest::create($url));
+            $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
+
+            // Restore current request
+            app()->instance('request', $currentRequest);
+            Facade::clearResolvedInstance('request');
+
+            // Note: use $url (not $request->path()) to get cache path
+            $path = urldecode(parse_url($url, PHP_URL_PATH) ?: '/');
+            $filename = (trim($path, '/') ?: 'index').'.html';
+
+            $this->saveFile($filename, $response->getContent());
+        }
+
+        echo 'Cached '.count($urls).' pages.'.PHP_EOL;
+    }
+
+    protected function saveSitemap($urls)
+    {
+        $filename = 'sitemap.txt';
+        $this->saveFile($filename, implode(PHP_EOL, $urls));
+        echo 'Sitemap: '.$this->getCacheUrl($filename).PHP_EOL;
     }
 
     protected function saveFile($filename, $content)
     {
         $path = $this->getCachePath($filename);
 
+        // If the file did not change, keeping the original file for
+        // cache-control usage, i.e. 304 response.
         if (file_exists($path) && md5_file($path) == md5($content)) {
             return;
         }
@@ -505,12 +521,41 @@ class CacheSite
 
     protected function getCachePath($path = '')
     {
-        return public_path('storage/site-cache'.($path ? '/'.trim($path, '/') : $path));
+        return public_path(static::CACHE_DIR.$this->prefixedPath($path));
+    }
+
+    protected function getCacheUrl($path = '')
+    {
+        return url(static::CACHE_DIR.$this->prefixedPath($path));
+    }
+
+    protected function prefixedPath($path = '')
+    {
+        $path = trim($path, '/');
+
+        return $path ? '/'.$path : '';
     }
 }
-EOT
 
-        # Register command
+EOF
+}
+
+cache_site()
+{
+    echo "Creating website cache..."
+
+    cd "$ROOT"
+
+    cacheSiteFile="$ROOT/app/CacheSite.php"
+    if [[ -f "$cacheSiteFile" ]]; then
+        unset cacheSiteFile
+    else
+        echo "$(cachesite_content)" > "$cacheSiteFile"
+    fi
+
+    # Register "cache-site" artisan command if it is not existed.
+    php artisan cache-site -h &>/dev/null
+    if [[ $? != 0 ]]; then
         kernel="$ROOT/app/Console/Kernel.php"
         kernelContent=$(cat "$kernel")
         from="\$this->command('docs:index'"
@@ -524,13 +569,10 @@ EOT
         echo "$kernelContent" > "$kernel"
     fi
 
-    php artisan cache:clear -q
     php artisan cache-site
 
-    if [[ -n "$cacheSiteFile" ]]; then
-        rm -rf "$cacheSiteFile"
-        git checkout "$kernel"
-    fi
+    [[ -n "$cacheSiteFile" ]] && rm -rf "$cacheSiteFile"
+    [[ -n "$kernel" ]] && git checkout "$kernel"
 }
 
 while [[ $# > 0 ]]; do
