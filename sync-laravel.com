@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="v1.19 - https://github.com/ElfSundae/sync-laravel.com"
+VER="v1.20 - https://github.com/ElfSundae/sync-laravel.com"
 
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
@@ -410,6 +410,7 @@ cachesite_content()
 
 namespace App;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Facade;
@@ -436,34 +437,53 @@ class CacheSite
     {
         $routes = [];
 
+        // Routes
         foreach (Route::getRoutes() as $route) {
-            if (! preg_match('#^([a-z-_]+/)?docs#i', $route->uri())) {
+            if (! Str::is('docs*', $route->uri())) {
                 $routes[] = $route->uri();
             }
         }
 
-        foreach (Documentation::getDocVersions() as $version => $display) {
-            $routes[] = "docs/$version";
+        $docVersions = array_keys(Documentation::getDocVersions());
 
-            foreach (glob(resource_path("docs/$version/*.md")) ?: [] as $path) {
-                $routes[] = "docs/$version/".pathinfo($path, PATHINFO_FILENAME);
-            }
+        // Docs index pages
+        foreach ($docVersions as $version) {
+            $routes[] = 'docs/'.$version;
         }
 
+        // Docs content pages
+        $docFiles = glob(resource_path('docs/{*,*/*}/*.md'), GLOB_BRACE) ?: [];
+        $docsRoot = resource_path('docs/');
+        foreach ($docFiles as $path) {
+            $path = Str::replaceFirst($docsRoot, '', $path);
+            $path = Str::replaceLast('.md', '', $path);
+            $segments = explode('/', $path);
+
+            if (in_array($segments[0], $docVersions, true)) {
+                array_unshift($segments, 'docs');
+            } else {
+                $locale = array_shift($segments);
+                array_unshift($segments, $locale, 'docs');
+            }
+
+            $routes[] = implode('/', $segments);
+        }
+
+        // Other pages
         $routes[] = '404';
 
         $result = $routes;
 
+        // Localized pages
         foreach (config('locales', []) as $locale) {
-            $result = array_merge(
-                $result,
-                array_map(function ($path) use ($locale) {
-                    return rtrim('/'.$locale.'/'.trim($path, '/'), '/');
-                }, $routes)
-            );
+            foreach ($routes as $path) {
+                if (explode('/', $path)[0] !== $locale) {
+                    $result[] = trim($locale.'/'.trim($path, '/'), '/');
+                }
+            }
         }
 
-        return $result;
+        return array_filter(array_unique($result));
     }
 
     protected function getApiUrls()
