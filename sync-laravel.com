@@ -163,9 +163,6 @@ update_app()
         exit_if_error
     fi
 
-    php artisan config:cache
-    # php artisan route:cache
-
     echo "Installing Node packages..."
     type yarn &>/dev/null
     if [[ $? == 0 ]]; then
