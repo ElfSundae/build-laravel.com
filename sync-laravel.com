@@ -236,7 +236,6 @@ build_api()
     rm -rf build
     rm -rf cache
     ./vendor/bin/sami.php update sami.php
-    exit_if_error
 
     mkdir -p "$apiDir"
     cp -af build/* "$apiDir"
