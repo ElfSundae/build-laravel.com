@@ -1,10 +1,10 @@
 <p align="center"><a href="https://laravel.0x123.com" target="_blank"><img src="https://laravel.0x123.com/assets/img/components/logo-laravel.svg"></a></p>
 
-[![Build Status](https://img.shields.io/travis/ElfSundae/sync-laravel.com/master.svg?style=flat-square)](https://travis-ci.org/ElfSundae/sync-laravel.com)
+[![Build Status](https://img.shields.io/travis/ElfSundae/build-laravel.com/master.svg?style=flat-square)](https://travis-ci.org/ElfSundae/build-laravel.com)
 
-Quickly create a local mirror of [laravel.com](https://laravel.com) website, and keep Laravel documentation up to date.
+A rapid way to build a mirror of [laravel.com](https://laravel.com) website, and keep Laravel documentation up to date.
 
-中国镜像：https://laravel.0x123.com
+> :cn: 中国镜像：https://laravel.0x123.com （ [源码](https://github.com/ElfSundae/laravel.com) ）
 
 ## Requirements
 
@@ -18,31 +18,32 @@ Quickly create a local mirror of [laravel.com](https://laravel.com) website, and
 ## Installation
 
 ```sh
-wget https://raw.githubusercontent.com/ElfSundae/sync-laravel.com/master/sync-laravel.com
-chmod +x sync-laravel.com
-./sync-laravel.com -h
+$ wget https://raw.githubusercontent.com/ElfSundae/build-laravel.com/master/build-laravel.com
+$ chmod +x build-laravel.com
 ```
 
 Upgrade this script:
 
 ```sh
-./sync-laravel.com upgrade
+$ build-laravel.com upgrade
 ```
 
 ## Usage
 
-Simply pass the root path of your mirror to the script:
+Simply pass the root path of your mirror site to the script:
 
 ```sh
-./sync-laravel.com /your/webroot/laravel.com
+$ build-laravel.com /your/webroot/laravel.com
 ```
 
-Then you can run `php artisan serve` to serve the mirror. Or the best practice is creating a virtual host configuration on your web server. And you may add a cron-job to keep your local mirror up to date with laravel.com.
+Then you can run `$ php artisan serve` to serve your mirror.
 
-You may use `-h` option to see the full usage:
+The best practice is configuring a virtual host on your web server, and you may add a cron-job to keep your mirror up to date with laravel.com.
+
+You can use `-h` option to see the full usage:
 
 ```
-Usage: sync-laravel.com <webroot> [<options>]
+Usage: build-laravel.com <webroot> [<options>]
 
 Options:
     upgrade             Upgrade this script
@@ -70,4 +71,4 @@ Options:
 
 ## License
 
-The MIT License.
+The [MIT License](LICENSE.md).

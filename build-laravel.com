@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="v1.20 - https://github.com/ElfSundae/sync-laravel.com"
+VER="v1.21 - https://github.com/ElfSundae/build-laravel.com"
 
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
@@ -163,9 +163,6 @@ update_app()
         exit_if_error
     fi
 
-    php artisan config:cache
-    # php artisan route:cache
-
     echo "Installing Node packages..."
     type yarn &>/dev/null
     if [[ $? == 0 ]]; then
@@ -239,7 +236,6 @@ build_api()
     rm -rf build
     rm -rf cache
     ./vendor/bin/sami.php update sami.php
-    exit_if_error
 
     mkdir -p "$apiDir"
     cp -af build/* "$apiDir"
@@ -250,7 +246,7 @@ build_api()
 
 upgrade_me()
 {
-    url="https://raw.githubusercontent.com/ElfSundae/sync-laravel.com/master/sync-laravel.com"
+    url="https://raw.githubusercontent.com/ElfSundae/build-laravel.com/master/build-laravel.com"
     to=$(fullpath `dirname "$0"`)/$(basename "$0")
     wget "$url" -O "$to"
     exit_if_error
