@@ -2,9 +2,9 @@
 
 [![Build Status](https://img.shields.io/travis/ElfSundae/build-laravel.com/master.svg?style=flat-square)](https://travis-ci.org/ElfSundae/build-laravel.com)
 
-Quickly create a local mirror of [laravel.com](https://laravel.com) website, and keep Laravel documentation up to date.
+A rapid way to build a mirror of [laravel.com](https://laravel.com) website, and keep Laravel documentation up to date.
 
-中国镜像：https://laravel.0x123.com
+> :cn: 中国镜像：https://laravel.0x123.com （ [源码](https://github.com/ElfSundae/laravel.com) ）
 
 ## Requirements
 
@@ -30,7 +30,7 @@ $ build-laravel.com upgrade
 
 ## Usage
 
-Simply pass the root path of your mirror to the script:
+Simply pass the root path of your mirror site to the script:
 
 ```sh
 $ build-laravel.com /your/webroot/laravel.com
@@ -38,7 +38,7 @@ $ build-laravel.com /your/webroot/laravel.com
 
 Then you can run `$ php artisan serve` to serve your mirror.
 
-The best practice is configuring a virtual host on your web server, and you may add a cron-job to keep your local mirror up to date with laravel.com.
+The best practice is configuring a virtual host on your web server, and you may add a cron-job to keep your mirror up to date with laravel.com.
 
 You can use `-h` option to see the full usage:
 
