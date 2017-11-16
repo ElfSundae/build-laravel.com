@@ -18,15 +18,14 @@ Quickly create a local mirror of [laravel.com](https://laravel.com) website, and
 ## Installation
 
 ```sh
-wget https://raw.githubusercontent.com/ElfSundae/sync-laravel.com/master/sync-laravel.com
-chmod +x sync-laravel.com
-./sync-laravel.com -h
+$ wget https://raw.githubusercontent.com/ElfSundae/sync-laravel.com/master/sync-laravel.com
+$ chmod +x sync-laravel.com
 ```
 
 Upgrade this script:
 
 ```sh
-./sync-laravel.com upgrade
+$ sync-laravel.com upgrade
 ```
 
 ## Usage
@@ -34,12 +33,14 @@ Upgrade this script:
 Simply pass the root path of your mirror to the script:
 
 ```sh
-./sync-laravel.com /your/webroot/laravel.com
+$ sync-laravel.com /your/webroot/laravel.com
 ```
 
-Then you can run `php artisan serve` to serve the mirror. Or the best practice is creating a virtual host configuration on your web server. And you may add a cron-job to keep your local mirror up to date with laravel.com.
+Then you can run `$ php artisan serve` to serve your mirror.
 
-You may use `-h` option to see the full usage:
+The best practice is configuring a virtual host on your web server, and you may add a cron-job to keep your local mirror up to date with laravel.com.
+
+You can use `-h` option to see the full usage:
 
 ```
 Usage: sync-laravel.com <webroot> [<options>]
