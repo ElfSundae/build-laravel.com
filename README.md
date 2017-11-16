@@ -2,9 +2,9 @@
 
 [![Build Status](https://img.shields.io/travis/ElfSundae/build-laravel.com/master.svg?style=flat-square)](https://travis-ci.org/ElfSundae/build-laravel.com)
 
-A rapid way to build a mirror of [laravel.com](https://laravel.com) website, and keep Laravel documentation up to date.
+A rapid way to build mirror of [laravel.com](https://laravel.com) website, and keep Laravel documentation up to date.
 
-> :cn: 中国镜像：https://laravel.0x123.com （ [源码](https://github.com/ElfSundae/laravel.com) ）
+[:cn: 中国镜像](https://github.com/ElfSundae/laravel.com)
 
 ## Requirements
 
