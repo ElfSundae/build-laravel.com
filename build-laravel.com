@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="v1.20 - https://github.com/ElfSundae/sync-laravel.com"
+VER="v1.20 - https://github.com/ElfSundae/build-laravel.com"
 
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
@@ -246,7 +246,7 @@ build_api()
 
 upgrade_me()
 {
-    url="https://raw.githubusercontent.com/ElfSundae/sync-laravel.com/master/sync-laravel.com"
+    url="https://raw.githubusercontent.com/ElfSundae/build-laravel.com/master/build-laravel.com"
     to=$(fullpath `dirname "$0"`)/$(basename "$0")
     wget "$url" -O "$to"
     exit_if_error

@@ -1,6 +1,6 @@
 <p align="center"><a href="https://laravel.0x123.com" target="_blank"><img src="https://laravel.0x123.com/assets/img/components/logo-laravel.svg"></a></p>
 
-[![Build Status](https://img.shields.io/travis/ElfSundae/sync-laravel.com/master.svg?style=flat-square)](https://travis-ci.org/ElfSundae/sync-laravel.com)
+[![Build Status](https://img.shields.io/travis/ElfSundae/build-laravel.com/master.svg?style=flat-square)](https://travis-ci.org/ElfSundae/build-laravel.com)
 
 Quickly create a local mirror of [laravel.com](https://laravel.com) website, and keep Laravel documentation up to date.
 
@@ -18,14 +18,14 @@ Quickly create a local mirror of [laravel.com](https://laravel.com) website, and
 ## Installation
 
 ```sh
-$ wget https://raw.githubusercontent.com/ElfSundae/sync-laravel.com/master/sync-laravel.com
-$ chmod +x sync-laravel.com
+$ wget https://raw.githubusercontent.com/ElfSundae/build-laravel.com/master/build-laravel.com
+$ chmod +x build-laravel.com
 ```
 
 Upgrade this script:
 
 ```sh
-$ sync-laravel.com upgrade
+$ build-laravel.com upgrade
 ```
 
 ## Usage
@@ -33,7 +33,7 @@ $ sync-laravel.com upgrade
 Simply pass the root path of your mirror to the script:
 
 ```sh
-$ sync-laravel.com /your/webroot/laravel.com
+$ build-laravel.com /your/webroot/laravel.com
 ```
 
 Then you can run `$ php artisan serve` to serve your mirror.
@@ -43,7 +43,7 @@ The best practice is configuring a virtual host on your web server, and you may 
 You can use `-h` option to see the full usage:
 
 ```
-Usage: sync-laravel.com <webroot> [<options>]
+Usage: build-laravel.com <webroot> [<options>]
 
 Options:
     upgrade             Upgrade this script

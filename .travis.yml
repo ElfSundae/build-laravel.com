@@ -8,12 +8,12 @@ before_script:
   - npm install -g gulp-cli
 
 script:
-  - bash sync-laravel.com -h
-  - bash sync-laravel.com laravel.com
-  - bash sync-laravel.com laravel.com status
-  - bash sync-laravel.com laravel.com skip-docs
-  - bash sync-laravel.com laravel.com skip-api
-  - bash sync-laravel.com laravel.com skip-api local-cdn china-cdn --gaid=UA-123456-7 remove-ga remove-ads
-  - bash sync-laravel.com laravel.com cache --root-url="http://example.com"
-  - bash sync-laravel.com laravel.com clean
-  - bash sync-laravel.com upgrade
+  - bash build-laravel.com -h
+  - bash build-laravel.com laravel.com
+  - bash build-laravel.com laravel.com status
+  - bash build-laravel.com laravel.com skip-docs
+  - bash build-laravel.com laravel.com skip-api
+  - bash build-laravel.com laravel.com skip-api local-cdn china-cdn --gaid=UA-123456-7 remove-ga remove-ads
+  - bash build-laravel.com laravel.com cache --root-url="http://example.com"
+  - bash build-laravel.com laravel.com clean
+  - bash build-laravel.com upgrade
