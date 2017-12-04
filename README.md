@@ -30,15 +30,13 @@ $ build-laravel.com upgrade
 
 ## Usage
 
-Simply pass the root path of your mirror site to the script:
+Simply pass the root path to the script:
 
 ```sh
-$ build-laravel.com /your/webroot/laravel.com
+$ build-laravel.com /data/www/laravel.com
 ```
 
-Then you can run `$ php artisan serve` to serve your mirror.
-
-The best practice is configuring a virtual host on your web server, and you may add a cron-job to keep your mirror up to date with laravel.com.
+Then you may run `$ php artisan serve` to serve your mirror, or configure a virtual host on your web server. And you may add a cron-job to keep your mirror up to date.
 
 You can use `-h` option to see the full usage:
 
