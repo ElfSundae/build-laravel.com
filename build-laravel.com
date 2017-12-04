@@ -1,7 +1,6 @@
 #!/bin/sh
 
-VER="v1.5.0 - https://github.com/ElfSundae/build-laravel.com"
-
+VER="1.5.0"
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
 usage()
@@ -9,7 +8,7 @@ usage()
     script=$(basename "$0")
     cat <<EOT
 Build mirror of Laravel.com
-$VER
+v$VER - https://github.com/ElfSundae/build-laravel.com
 
 Usage: $script <webroot> [<options>]
 
