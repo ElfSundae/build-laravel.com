@@ -33,7 +33,7 @@ Options:
     cache               Create website cache
     clean               Clean webroot
     -f, --force         Force build
-    --version           Print version of this script
+    -v, --version       Print version of this script
     -h, --help          Show this help
 EOT
 }
@@ -658,7 +658,7 @@ while [[ $# > 0 ]]; do
             FORCE=1
             shift
             ;;
-        --version)
+        -v|--version)
             echo "$VER"
             exit 0
             ;;
