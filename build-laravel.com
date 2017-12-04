@@ -1,15 +1,14 @@
 #!/bin/sh
 
-VER="v1.5.0 - https://github.com/ElfSundae/build-laravel.com"
-
+VER="1.5.1"
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
 usage()
 {
     script=$(basename "$0")
     cat <<EOT
-Sync local mirror of laravel.com website.
-$VER
+Build mirror of Laravel.com
+v$VER - https://github.com/ElfSundae/build-laravel.com
 
 Usage: $script <webroot> [<options>]
 
@@ -33,7 +32,7 @@ Options:
     cache               Create website cache
     clean               Clean webroot
     -f, --force         Force build
-    --version           Print version of this script
+    -v, --version       Print version of this script
     -h, --help          Show this help
 EOT
 }
@@ -658,7 +657,7 @@ while [[ $# > 0 ]]; do
             FORCE=1
             shift
             ;;
-        --version)
+        -v|--version)
             echo "$VER"
             exit 0
             ;;
