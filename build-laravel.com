@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="1.5.2"
+VER="1.5.3"
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 master)
 
 usage()
@@ -290,7 +290,7 @@ cdn_url()
     if [[ -n $CHINA_CDN ]]; then
         text=${text//cdnjs.cloudflare.com/cdnjs.cat.net}
         # text=${text//fonts.googleapis.com/fonts.cat.net}
-        text=${text//fonts.gstatic.com/gstatic.cat.net}
+        # text=${text//fonts.gstatic.com/gstatic.cat.net}
     fi
 
     echo "$text"
