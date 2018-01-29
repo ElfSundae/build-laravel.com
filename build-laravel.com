@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="1.7.1"
+VER="1.8.0"
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 5.6 master)
 
 usage()
@@ -63,7 +63,7 @@ fullpath()
 clean_repo()
 {
     if [[ -d "$ROOT" ]]; then
-        git -C "$ROOT" clean -dfx
+        git -C "$ROOT" clean -dfx -e "/.env"
     fi
 }
 
