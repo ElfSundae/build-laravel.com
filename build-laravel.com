@@ -223,7 +223,7 @@ build_api()
     apiOldVer=`cat "$apiVerFile" 2>/dev/null`
     apiVer=$(git -C "laravel" log -1 --format="%H" --all)
 
-    if [[ $apiOldVer == $apiVer ]] && [[ -z $FORCE ]]; then
+    if [[ -z $FORCE ]] && [[ -d "$apiDir" ]] && [[ $apiOldVer == $apiVer ]]; then
         return
     fi
 
