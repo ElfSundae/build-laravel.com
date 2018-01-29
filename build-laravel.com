@@ -227,10 +227,14 @@ build_api()
         return
     fi
 
-    composer require sami/sami:~4.0 --prefer-stable --prefer-dist
-    exit_if_error
-    git checkout composer.json
-    git checkout composer.lock &>/dev/null
+    if [[ 1 ]]; then
+        composer install
+    else
+        composer require sami/sami:~4.0 --prefer-stable --prefer-dist
+        exit_if_error
+        git checkout composer.json
+        git checkout composer.lock &>/dev/null
+    fi
 
     rm -rf build
     rm -rf cache
