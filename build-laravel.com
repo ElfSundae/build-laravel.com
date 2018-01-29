@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="1.6.0"
+VER="1.7.0"
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 5.6 master)
 
 usage()
@@ -700,6 +700,8 @@ if [[ -n $CLEAN_REPO ]]; then
     exit 0
 fi
 
+START_TIME=$SECONDS
+
 if [[ -z $SKIP_UPDATE_APP ]]; then
     update_app
     process_views
@@ -714,4 +716,6 @@ fi
 [[ -z $SKIP_API ]] && build_api
 [[ -n $CACHE ]] && cache_site
 
-echo "Completed successfully!"
+ELAPSED_TIME=$(($SECONDS - $START_TIME))
+
+echo "*** Done in $(($ELAPSED_TIME/60)) min $(($ELAPSED_TIME%60)) sec."
