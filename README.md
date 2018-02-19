@@ -8,7 +8,7 @@ A rapid way to build mirror of [laravel.com](https://laravel.com) website, and k
 
 ## Requirements
 
-- PHP >= 7.0.0
+- PHP 7
 - `wget`
 - `git`
 - `composer`
