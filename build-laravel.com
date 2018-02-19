@@ -39,7 +39,11 @@ EOT
 
 exit_if_error()
 {
-    [ $? -eq 0 ] || exit $?
+    code=$?
+    if [[ $code -ne 0 ]]; then
+        echo "*** Exit with error.";
+        exit $code
+    fi
 }
 
 exit_with_error()
