@@ -201,7 +201,7 @@ update_docs()
         fi
     done
 
-    # This maybe legacy code, see CacheResponse middleware
+    # This may be legacy code, see CacheResponse middleware
     php artisan docs:clear-cache
 }
 
