@@ -603,8 +603,8 @@ EOT
 while [[ $# > 0 ]]; do
     case "$1" in
         upgrade)
-            upgrade_me
-            exit
+            UPGRADE_ME=1
+            shift
             ;;
         status)
             CHECK_STATUS=1
@@ -685,6 +685,11 @@ while [[ $# > 0 ]]; do
             ;;
     esac
 done
+
+if [[ -n $UPGRADE_ME ]]; then
+    upgrade_me
+    exit 0
+fi
 
 if [[ -z "$ROOT" ]]; then
     exit_with_error "Missing argument: webroot path"
