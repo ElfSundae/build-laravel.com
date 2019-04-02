@@ -580,14 +580,19 @@ cache_site()
     if [[ $? != 0 ]]; then
         kernel="$ROOT/app/Console/Kernel.php"
         kernelContent=$(cat "$kernel")
-        from="\$this->command('docs:index'"
-        to=$(cat <<'EOT'
-$this->command('cache-site', function () {
-    app()->call('App\CacheSite@cache');
-});
+        from=$(cat <<'EOT'
+    protected function commands()
+    {
 EOT
 )
-        kernelContent=${kernelContent/"$from"/"$to $from"}
+        to=$(cat <<'EOT'
+
+        $this->command('cache-site', function () {
+            app()->call('App\CacheSite@cache');
+        });
+EOT
+)
+        kernelContent=${kernelContent/"$from"/"$from$to"}
         echo "$kernelContent" > "$kernel"
     fi
 
