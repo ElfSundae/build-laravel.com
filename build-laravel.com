@@ -148,6 +148,9 @@ update_app()
         exit_if_error
     fi
 
+    php artisan clear-compiled
+    php artisan view:clear
+
     if [[ -n "$ROOT_URL" ]]; then
         oldAppUrl=$(cat .env | grep "APP_URL=" -m1)
         newAppUrl="APP_URL=$ROOT_URL"
