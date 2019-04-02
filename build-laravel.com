@@ -246,7 +246,8 @@ build_api()
     rm -rf cache
     ./vendor/bin/sami.php update sami.php
 
-    mkdir -p "$apiDir"
+    rm -rf "$apiDir"
+    mkdir "$apiDir"
     cp -af build/* "$apiDir"
     echo "$apiVer" > "$apiVerFile"
     rm -rf build
