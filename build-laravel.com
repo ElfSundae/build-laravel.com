@@ -387,6 +387,11 @@ process_views()
         echo "$appContent" > "$appView"
     fi
 
+    # Remove typography style files: https://cloud.typography.com/7737514/7707592/css/fonts.css
+    typography=`echo "$appContent" | grep -E "typography\.com"`
+    appContent=${appContent//"$typography"}
+    echo "$appContent" > "$appView"
+
     # Remove Ads
     if [[ -n $REMOVE_ADS ]]; then
         docsView="$ROOT/resources/views/docs.blade.php"
