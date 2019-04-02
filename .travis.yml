@@ -1,10 +1,18 @@
+dist: trusty
 language: php
 
 php:
   - 7.1
+  - 7.2
+  - 7.3
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.composer/cache
 
 before_script:
-  - composer self-update
   - npm install -g gulp-cli
 
 script:
@@ -13,7 +21,7 @@ script:
   - bash build-laravel.com laravel.com status
   - bash build-laravel.com laravel.com skip-docs
   - bash build-laravel.com laravel.com skip-api
-  - bash build-laravel.com laravel.com skip-api local-cdn china-cdn --gaid=UA-123456-7 remove-ga remove-ads
+  - bash build-laravel.com laravel.com skip-api local-cdn china-cdn remove-ga remove-ads --gaid=UA-123456-7
   - bash build-laravel.com laravel.com cache --root-url="http://example.com"
   - bash build-laravel.com laravel.com clean
   - bash build-laravel.com upgrade

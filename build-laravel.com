@@ -1,7 +1,7 @@
 #!/bin/sh
 
 VER="1.9.0"
-DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 5.6 master)
+DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 5.6 5.7 5.8 master)
 
 usage()
 {
@@ -10,27 +10,26 @@ usage()
 Build mirror of Laravel.com
 v$VER - https://github.com/ElfSundae/build-laravel.com
 
-Usage: $script <webroot> [<options>]
+Usage: $script <webroot> [options]
 
 Options:
-    upgrade             Upgrade this script
     status              Check status of webroot and docs
-    --root-url=URL      Set the root URL of website, APP_URL environment variable
-    skip-docs           Skip updating docs
-    skip-api            Skip building api documentation
-    skip-update-app     Skip updating app: pull repository, install PHP and Node
-                        packages, process views, compile assets
-    local-cdn           Download static files from CDN, and host them locally
-    --font-format=FMT   Use FMT when downloading Google Fonts
-                        Supported: eot, ttf, svg, woff, woff2
-                        Default is woff2
-    --title=TXT         Replace page title to TXT
+    clean               Clean webroot
+    local-cdn           Host CDN files locally
     china-cdn           Replace CDN hosts with China mirrors
-    --gaid=GID          Replace Google Analytics tracking ID with GID
     remove-ga           Remove Google Analytics
     remove-ads          Remove advertisements
     cache               Create website cache
-    clean               Clean webroot
+    skip-docs           Skip updating docs
+    skip-api            Skip building API documentation
+    skip-update-app     Skip updating app: git-pull repository, install PHP and Node packages,
+                        process views, compile assets, etc
+    upgrade             Upgrade this script
+    --root-url=URL      Set the root URL of website: APP_URL env variable
+    --title=TXT         Replace page title to TXT
+    --gaid=GID          Replace Google Analytics tracking ID with GID
+    --font-format=FMT   Use FMT when downloading Google Fonts, default is woff2
+                        Supported: eot, ttf, svg, woff, woff2
     -f, --force         Force build
     -v, --version       Print version of this script
     -h, --help          Show this help
@@ -39,7 +38,11 @@ EOT
 
 exit_if_error()
 {
-    [ $? -eq 0 ] || exit $?
+    code=$?
+    if [[ $code -ne 0 ]]; then
+        echo "*** Exit with error.";
+        exit $code
+    fi
 }
 
 exit_with_error()
@@ -123,7 +126,7 @@ update_app()
         git clone git://github.com/laravel/laravel.com.git "$ROOT"
     else
         git -C "$ROOT" reset --hard
-        git -C "$ROOT" pull #origin master
+        git -C "$ROOT" pull
     fi
     exit_if_error
 
@@ -144,6 +147,9 @@ update_app()
         php artisan key:generate
         exit_if_error
     fi
+
+    php artisan clear-compiled
+    php artisan view:clear
 
     if [[ -n "$ROOT_URL" ]]; then
         oldAppUrl=$(cat .env | grep "APP_URL=" -m1)
@@ -177,7 +183,7 @@ compile_assets()
     cd "$ROOT"
 
     echo "Compiling Assets..."
-    gulp --production &>/dev/null
+    npm run production &>/dev/null
     exit_if_error
 }
 
@@ -198,7 +204,7 @@ update_docs()
         fi
     done
 
-    # This maybe legacy code, see CacheResponse middleware
+    # This may be legacy code, see CacheResponse middleware
     php artisan docs:clear-cache
 }
 
@@ -230,7 +236,7 @@ build_api()
     if [[ 1 ]]; then
         composer install
     else
-        composer require sami/sami:~4.0 --prefer-stable --prefer-dist
+        composer require sami/sami:~4.1 --prefer-stable --prefer-dist
         exit_if_error
         git checkout composer.json
         git checkout composer.lock &>/dev/null
@@ -380,6 +386,11 @@ process_views()
         appContent=${appContent/"$from"/"// $from"}
         echo "$appContent" > "$appView"
     fi
+
+    # Remove typography style files: https://cloud.typography.com/7737514/7707592/css/fonts.css
+    typography=`echo "$appContent" | grep -E "typography\.com"`
+    appContent=${appContent//"$typography"}
+    echo "$appContent" > "$appView"
 
     # Remove Ads
     if [[ -n $REMOVE_ADS ]]; then
@@ -577,14 +588,19 @@ cache_site()
     if [[ $? != 0 ]]; then
         kernel="$ROOT/app/Console/Kernel.php"
         kernelContent=$(cat "$kernel")
-        from="\$this->command('docs:index'"
-        to=$(cat <<'EOT'
-$this->command('cache-site', function () {
-    app()->call('App\CacheSite@cache');
-});
+        from=$(cat <<'EOT'
+    protected function commands()
+    {
 EOT
 )
-        kernelContent=${kernelContent/"$from"/"$to $from"}
+        to=$(cat <<'EOT'
+
+        $this->command('cache-site', function () {
+            app()->call('App\CacheSite@cache');
+        });
+EOT
+)
+        kernelContent=${kernelContent/"$from"/"$from$to"}
         echo "$kernelContent" > "$kernel"
     fi
 
