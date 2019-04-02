@@ -180,7 +180,7 @@ compile_assets()
     cd "$ROOT"
 
     echo "Compiling Assets..."
-    gulp --production &>/dev/null
+    npm run production &>/dev/null
     exit_if_error
 }
 
@@ -233,7 +233,7 @@ build_api()
     if [[ 1 ]]; then
         composer install
     else
-        composer require sami/sami:~4.0 --prefer-stable --prefer-dist
+        composer require sami/sami:~4.1 --prefer-stable --prefer-dist
         exit_if_error
         git checkout composer.json
         git checkout composer.lock &>/dev/null
