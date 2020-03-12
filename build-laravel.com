@@ -257,7 +257,7 @@ build_api()
 upgrade_me()
 {
     url="https://raw.githubusercontent.com/ElfSundae/build-laravel.com/master/build-laravel.com"
-    to=$(fullpath `dirname "$0"`)/$(basename "$0")
+    to="$(fullpath $(dirname "$(realpath "$0")"))/$(basename "$0")"
     wget "$url" -O "$to"
     exit_if_error
     chmod +x "$to"
