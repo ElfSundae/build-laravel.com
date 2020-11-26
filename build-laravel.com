@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="1.12.0"
+VER="1.12.1"
 DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 5.6 5.7 5.8 6.x 7.x 8.x master)
 
 usage()
@@ -466,6 +466,10 @@ class CacheSite
         $docFiles = glob(resource_path('docs/{*,*/*}/*.md'), GLOB_BRACE) ?: [];
         $docsRoot = resource_path('docs/');
         foreach ($docFiles as $path) {
+            if(! mb_check_encoding(pathinfo($path, PATHINFO_BASENAME), 'ASCII')) {
+                continue;
+            }
+
             $path = Str::replaceFirst($docsRoot, '', $path);
             $path = Str::replaceLast('.md', '', $path);
             $segments = explode('/', $path);
