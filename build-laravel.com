@@ -164,6 +164,7 @@ update_app()
     fi
 
     if ! [[ -d "public/storage" ]]; then
+        rm -rf "public/storage"
         php artisan storage:link
         exit_if_error
     fi
