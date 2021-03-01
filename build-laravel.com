@@ -123,7 +123,7 @@ process_source()
 update_app()
 {
     if ! [[ -d "$ROOT" ]]; then
-        git clone git://github.com/laravel/laravel.com.git "$ROOT"
+        git clone https://github.com/ElfSundae/laravel.com.git "$ROOT"
     else
         git -C "$ROOT" reset --hard
         git -C "$ROOT" pull
