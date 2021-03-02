@@ -213,9 +213,9 @@ build_api()
 {
     echo "Building API documentation..."
 
-    sami=$ROOT/build/sami
+    doctum=$ROOT/build/doctum
 
-    cd "$sami"
+    cd "$doctum"
 
     if ! [[ -d laravel ]]; then
         git clone git://github.com/laravel/framework.git laravel
@@ -237,7 +237,7 @@ build_api()
     if [[ 1 ]]; then
         composer install
     else
-        composer require sami/sami:~4.1 --prefer-stable --prefer-dist
+        composer require code-lts/doctum --prefer-stable --prefer-dist
         exit_if_error
         git checkout composer.json
         git checkout composer.lock &>/dev/null
@@ -245,7 +245,7 @@ build_api()
 
     rm -rf build
     rm -rf cache
-    ./vendor/bin/sami.php update sami.php
+    ./vendor/bin/doctum.php update doctum.php
 
     rm -rf "$apiDir"
     mkdir "$apiDir"
