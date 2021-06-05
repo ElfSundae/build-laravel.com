@@ -1,0 +1,41 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 1 * * *'
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [7.1, 7.2, 7.3, 7.4, 8.0]
+
+    name: PHP ${{ matrix.php }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd, bcmath, gmp
+
+      - name: Install dependencies
+        run: npm install -g gulp-cli
+
+      - run: bash build-laravel.com -h
+      - run: bash build-laravel.com laravel.com
+      - run: bash build-laravel.com laravel.com status
+      - run: bash build-laravel.com laravel.com skip-docs
+      - run: bash build-laravel.com laravel.com skip-api
+      - run: bash build-laravel.com laravel.com skip-api local-cdn china-cdn remove-ga remove-ads --gaid=UA-123456-7
+      - run: bash build-laravel.com laravel.com cache --root-url="http://example.com"
+      - run: bash build-laravel.com laravel.com clean
+      - run: bash build-laravel.com upgrade
+
