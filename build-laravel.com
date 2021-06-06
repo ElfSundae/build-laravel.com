@@ -300,7 +300,7 @@ cdn_url()
     text=$1
 
     if [[ -n $CHINA_CDN ]]; then
-        text=${text//cdnjs.cloudflare.com/cdnjs.cat.net}
+        text=${text//cdnjs.cloudflare.com/cdnjs.loli.net}
         # text=${text//fonts.googleapis.com/fonts.cat.net}
         # text=${text//fonts.gstatic.com/gstatic.cat.net}
     fi
