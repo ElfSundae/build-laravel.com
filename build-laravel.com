@@ -301,8 +301,8 @@ cdn_url()
 
     if [[ -n $CHINA_CDN ]]; then
         text=${text//cdnjs.cloudflare.com/cdnjs.loli.net}
-        # text=${text//fonts.googleapis.com/fonts.cat.net}
-        # text=${text//fonts.gstatic.com/gstatic.cat.net}
+        text=${text//fonts.googleapis.com/fonts.loli.net}
+        text=${text//fonts.gstatic.com/gstatic.loli.net}
     fi
 
     echo "$text"
