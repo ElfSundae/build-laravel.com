@@ -404,15 +404,15 @@ process_views()
     fi
 
     # Host external assets
-    marketingView="$ROOT/resources/views/marketing.blade.php"
-    marketingContent=$(cat "$marketingView")
-    external=`echo "$marketingContent" | grep -o -E "https.+ui-preview\.png"`
-    echo "Downloading $external"
-    filename=$(download "$external")
-    if [[ "$filename" ]]; then
-        marketingContent=${marketingContent/$external/\/$filename}
-        echo "$marketingContent" > "$marketingView"
-    fi
+    # marketingView="$ROOT/resources/views/marketing.blade.php"
+    # marketingContent=$(cat "$marketingView")
+    # external=`echo "$marketingContent" | grep -o -E "https.+ui-preview\.png"`
+    # echo "Downloading $external"
+    # filename=$(download "$external")
+    # if [[ "$filename" ]]; then
+    #     marketingContent=${marketingContent/$external/\/$filename}
+    #     echo "$marketingContent" > "$marketingView"
+    # fi
 }
 
 cachesite_content()
