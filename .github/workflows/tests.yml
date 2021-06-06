@@ -26,9 +26,6 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd, bcmath, gmp
 
-      - name: Install dependencies
-        run: npm install -g gulp-cli
-
       - run: bash build-laravel.com -h
       - run: bash build-laravel.com laravel.com
       - run: bash build-laravel.com laravel.com status

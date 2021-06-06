@@ -13,7 +13,6 @@ A rapid way to build mirror of [laravel.com](https://laravel.com) website, and k
 - `git`
 - `composer`
 - `npm` or `yarn`
-- `gulp`
 
 ## Installation
 
