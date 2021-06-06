@@ -134,7 +134,7 @@ update_app()
 
     cd "$ROOT"
 
-    process_source
+    # process_source
 
     echo "Installing PHP packages..."
     rm -rf bootstrap/cache/*
