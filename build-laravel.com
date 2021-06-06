@@ -237,7 +237,7 @@ build_api()
     if [[ 1 ]]; then
         composer install
     else
-        composer require code-lts/doctum --prefer-stable --prefer-dist
+        composer require code-lts/doctum
         exit_if_error
         git checkout composer.json
         git checkout composer.lock &>/dev/null
@@ -245,7 +245,7 @@ build_api()
 
     rm -rf build
     rm -rf cache
-    ./vendor/bin/doctum.php update doctum.php
+    ./vendor/bin/doctum.php update doctum.php -v --ignore-parse-errors
 
     rm -rf "$apiDir"
     mkdir "$apiDir"
