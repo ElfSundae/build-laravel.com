@@ -1,6 +1,10 @@
-<p align="center"><a href="https://laravel.0x123.com" target="_blank"><img src="https://laravel.0x123.com/assets/img/components/logo-laravel.svg"></a></p>
+<p align="center">
+    <a href="https://laravel.0x123.com" target="_blank">
+        <img src="https://raw.githubusercontent.com/ElfSundae/laravel.com/master/public/assets/img/components/logo-laravel.svg">
+    </a>
+</p>
 
-[![Build Status](https://img.shields.io/travis/ElfSundae/build-laravel.com/master.svg?style=flat-square)](https://travis-ci.org/ElfSundae/build-laravel.com)
+[![tests](https://github.com/ElfSundae/build-laravel.com/actions/workflows/tests.yml/badge.svg)](https://github.com/ElfSundae/build-laravel.com/actions/workflows/tests.yml)
 
 A rapid way to build mirror of [laravel.com](https://laravel.com) website, and keep Laravel documentation up to date.
 
@@ -8,7 +12,7 @@ A rapid way to build mirror of [laravel.com](https://laravel.com) website, and k
 
 ## Requirements
 
-- PHP 7
+- PHP 7 / 8
 - `wget`
 - `git`
 - `composer`
