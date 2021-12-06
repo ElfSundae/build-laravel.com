@@ -222,7 +222,7 @@ build_api()
     else
         git -C laravel reset --hard -q
         git -C laravel clean -dfx
-        git -C laravel fetch
+        git -C laravel pull
     fi
 
     apiDir=$ROOT/public/api
