@@ -246,6 +246,7 @@ build_api()
     rm -rf build
     rm -rf cache
     ./vendor/bin/doctum.php update doctum.php -v --ignore-parse-errors
+    exit_if_error
 
     rm -rf "$apiDir"
     mkdir "$apiDir"
