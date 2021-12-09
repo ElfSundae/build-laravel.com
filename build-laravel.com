@@ -138,7 +138,11 @@ update_app()
 
     echo "Installing PHP packages..."
     rm -rf bootstrap/cache/*
-    composer install --no-dev -o --no-interaction -q
+    if [[ "$(php -r "echo PHP_MAJOR_VERSION;")" -ge "8" ]]; then
+        composer update --no-dev -o --no-interaction
+    else
+        composer install --no-dev -o --no-interaction -q
+    fi
     exit_if_error
 
     if ! [[ -f ".env" ]]; then
@@ -234,14 +238,19 @@ build_api()
         return
     fi
 
-    if [[ 1 ]]; then
-        composer install
+    if [[ "$(php -r "echo PHP_MAJOR_VERSION;")" -ge "8" ]]; then
+        composer update
     else
-        composer require code-lts/doctum
-        exit_if_error
-        git checkout composer.json
-        git checkout composer.lock &>/dev/null
+        if [[ 1 ]]; then
+            composer install
+        else
+            composer require code-lts/doctum
+            exit_if_error
+            git checkout composer.json
+            git checkout composer.lock &>/dev/null
+        fi
     fi
+    exit_if_error
 
     rm -rf build
     rm -rf cache
