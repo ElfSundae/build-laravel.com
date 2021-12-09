@@ -138,11 +138,6 @@ update_app()
 
     echo "Installing PHP packages..."
     rm -rf bootstrap/cache/*
-    # if [[ "$(php -r "echo PHP_MAJOR_VERSION;")" -ge "8" ]]; then
-    #     composer update --no-dev -o --no-interaction
-    # else
-    #     composer install --no-dev -o --no-interaction -q
-    # fi
     composer install --no-dev -o --no-interaction -q
     exit_if_error
 
@@ -240,16 +235,12 @@ build_api()
     fi
 
     if [[ "$(php -r "echo PHP_MAJOR_VERSION;")" -ge "8" ]]; then
-        composer update
+        composer require code-lts/doctum:dev-main
+        exit_if_error
+        git checkout composer.json
+        git checkout composer.lock &>/dev/null
     else
-        if [[ 1 ]]; then
-            composer install
-        else
-            composer require code-lts/doctum
-            exit_if_error
-            git checkout composer.json
-            git checkout composer.lock &>/dev/null
-        fi
+        composer install
     fi
     exit_if_error
 
