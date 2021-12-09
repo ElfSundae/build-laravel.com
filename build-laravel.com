@@ -138,11 +138,12 @@ update_app()
 
     echo "Installing PHP packages..."
     rm -rf bootstrap/cache/*
-    if [[ "$(php -r "echo PHP_MAJOR_VERSION;")" -ge "8" ]]; then
-        composer update --no-dev -o --no-interaction
-    else
-        composer install --no-dev -o --no-interaction -q
-    fi
+    # if [[ "$(php -r "echo PHP_MAJOR_VERSION;")" -ge "8" ]]; then
+    #     composer update --no-dev -o --no-interaction
+    # else
+    #     composer install --no-dev -o --no-interaction -q
+    # fi
+    composer install --no-dev -o --no-interaction -q
     exit_if_error
 
     if ! [[ -f ".env" ]]; then
