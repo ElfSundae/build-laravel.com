@@ -449,7 +449,7 @@ class CacheSite
 
     protected function getRoutePaths()
     {
-        $routes = [];
+        $routes = ['docs'];
 
         // Routes
         foreach (Route::getRoutes() as $route) {
@@ -457,18 +457,11 @@ class CacheSite
                 $routes[] = $route->uri();
             }
         }
-        $routes[] = 'docs';
-
-        $docVersions = array_keys(Documentation::getDocVersions());
-
-        // Docs index pages
-        // foreach ($docVersions as $version) {
-        //     $routes[] = 'docs/'.$version;
-        // }
 
         // Docs content pages
         $docFiles = glob(resource_path('docs/{*,*/*}{,/*.md}'), GLOB_BRACE) ?: [];
         $docsRoot = resource_path('docs/');
+        $docVersions = array_keys(Documentation::getDocVersions());
         foreach ($docFiles as $path) {
             if (! mb_check_encoding(pathinfo($path, PATHINFO_BASENAME), 'ASCII')) {
                 continue;
