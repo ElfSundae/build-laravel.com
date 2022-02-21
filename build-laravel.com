@@ -427,6 +427,7 @@ namespace App;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
@@ -440,9 +441,13 @@ class CacheSite
         // Clear the parsed doc markdown cache
         Artisan::call('cache:clear');
 
+        // File::deleteDirectory($this->getCachePath(), true);
+
         $routeUrls = array_map('url', $this->getRoutePaths());
 
         $this->saveResponseForUrls($routeUrls);
+
+        $this->cleanCacheDirectory($routeUrls);
 
         $this->saveSitemap(array_merge($routeUrls, $this->getApiUrls()));
     }
@@ -533,6 +538,24 @@ class CacheSite
         // HandleLocale middleware changed app locale and root url of UrlGenerator.
         app()->setLocale('en');
         app('url')->forceRootUrl(request()->root());
+    }
+
+    protected function cleanCacheDirectory($urls)
+    {
+        $rootUrl = request()->root();
+        $rootDir = $this->getCachePath();
+        $files = array_map(function ($value) use ($rootUrl, $rootDir) {
+            return Str::replaceFirst($rootUrl, $rootDir, $value).'.html';
+        }, $urls);
+
+        $existFiles = glob($rootDir.'/{*,*/*,*/*/*}.html', GLOB_BRACE) ?: [];
+        $existFiles = array_filter($existFiles, function ($value) {
+            return ! Str::endsWith($value, ['/index.html']);
+        });
+
+        File::delete(array_diff($existFiles, $files));
+
+        system('find "'.$rootDir.'" -type d -empty -delete');
     }
 
     protected function saveSitemap($urls)
