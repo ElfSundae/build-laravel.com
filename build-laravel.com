@@ -622,8 +622,8 @@ EOT
 
     php artisan cache-site
 
-    # [[ -n "$cacheSiteFile" ]] && rm -rf "$cacheSiteFile"
-    # [[ -n "$kernel" ]] && git checkout "$kernel"
+    [[ -n "$cacheSiteFile" ]] && rm -rf "$cacheSiteFile"
+    [[ -n "$kernel" ]] && git checkout "$kernel"
 }
 
 ###############################################################################
