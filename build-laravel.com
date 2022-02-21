@@ -522,6 +522,7 @@ class CacheSite
             // Restore current request
             app()->instance('request', $currentRequest);
             Facade::clearResolvedInstance('request');
+            $this->restoreLocale();
 
             // Note: use $url (not $request->path()) to get cache path
             $path = urldecode(parse_url($url, PHP_URL_PATH) ?: '/');
@@ -531,6 +532,13 @@ class CacheSite
         }
 
         echo 'Cached '.count($urls).' pages.'.PHP_EOL;
+    }
+
+    protected function restoreLocale()
+    {
+        // HandleLocale middleware changed app locale and root url of UrlGenerator.
+        app()->setLocale('en');
+        app('url')->forceRootUrl(request()->root());
     }
 
     protected function saveSitemap($urls)
@@ -614,8 +622,8 @@ EOT
 
     php artisan cache-site
 
-    [[ -n "$cacheSiteFile" ]] && rm -rf "$cacheSiteFile"
-    [[ -n "$kernel" ]] && git checkout "$kernel"
+    # [[ -n "$cacheSiteFile" ]] && rm -rf "$cacheSiteFile"
+    # [[ -n "$kernel" ]] && git checkout "$kernel"
 }
 
 ###############################################################################
