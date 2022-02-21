@@ -522,7 +522,7 @@ class CacheSite
             $path = urldecode(parse_url($url, PHP_URL_PATH) ?: '/');
             $filename = (trim($path, '/') ?: 'index').'.html';
 
-            $this->saveFile($filename, $response->getContent());
+            $this->saveFile($filename, $response->getContent(), true);
         }
 
         echo 'Cached '.count($urls).' pages.'.PHP_EOL;
@@ -542,13 +542,13 @@ class CacheSite
         echo 'Sitemap: '.$this->getCacheUrl($filename).PHP_EOL;
     }
 
-    protected function saveFile($filename, $content)
+    protected function saveFile($filename, $content, $checkHash = false)
     {
         $path = $this->getCachePath($filename);
 
         // If the file did not change, keeping the original file for
         // cache-control usage, i.e. 304 response.
-        if (file_exists($path) && md5_file($path) == md5($content)) {
+        if ($checkHash && file_exists($path) && md5_file($path) == md5($content)) {
             return;
         }
 
