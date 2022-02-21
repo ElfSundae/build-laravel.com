@@ -457,6 +457,7 @@ class CacheSite
                 $routes[] = $route->uri();
             }
         }
+        $routes[] = 'docs';
 
         $docVersions = array_keys(Documentation::getDocVersions());
 
