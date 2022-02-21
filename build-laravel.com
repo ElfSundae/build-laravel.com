@@ -424,11 +424,11 @@ cachesite_content()
 
 namespace App;
 
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 class CacheSite
@@ -469,7 +469,7 @@ class CacheSite
         $docFiles = glob(resource_path('docs/{*,*/*}{,/*.md}'), GLOB_BRACE) ?: [];
         $docsRoot = resource_path('docs/');
         foreach ($docFiles as $path) {
-            if(! mb_check_encoding(pathinfo($path, PATHINFO_BASENAME), 'ASCII')) {
+            if (! mb_check_encoding(pathinfo($path, PATHINFO_BASENAME), 'ASCII')) {
                 continue;
             }
 
