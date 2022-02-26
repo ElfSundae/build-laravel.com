@@ -171,9 +171,9 @@ update_app()
 
     echo "Installing Node packages..."
     if command -v yarn &>/dev/null; then
-        yarn &>/dev/null
+        yarn
     else
-        npm install &>/dev/null
+        npm install
     fi
     exit_if_error
 }
