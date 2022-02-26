@@ -209,7 +209,7 @@ update_docs()
     done
 
     # This may be legacy code, see CacheResponse middleware
-    php artisan docs:clear-cache
+    # php artisan docs:clear-cache
 }
 
 build_api()
