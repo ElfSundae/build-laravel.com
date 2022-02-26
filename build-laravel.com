@@ -170,8 +170,7 @@ update_app()
     fi
 
     echo "Installing Node packages..."
-    type yarn &>/dev/null
-    if [[ $? == 0 ]]; then
+    if command -v yarn &>/dev/null; then
         yarn &>/dev/null
     else
         npm install &>/dev/null
@@ -184,7 +183,11 @@ compile_assets()
     cd "$ROOT"
 
     echo "Compiling Assets..."
-    npm run production &>/dev/null
+    if command -v yarn &>/dev/null; then
+        yarn run production
+    else
+        npm run production
+    fi
     exit_if_error
 }
 
