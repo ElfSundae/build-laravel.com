@@ -148,9 +148,6 @@ update_app()
         exit_if_error
     fi
 
-    php artisan clear-compiled
-    php artisan view:clear
-
     if [[ -n "$ROOT_URL" ]]; then
         oldAppUrl=$(cat .env | grep "APP_URL=" -m1)
         newAppUrl="APP_URL=$ROOT_URL"
@@ -168,6 +165,10 @@ update_app()
         php artisan storage:link
         exit_if_error
     fi
+
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
 
     echo "Installing Node packages..."
     if command -v yarn &>/dev/null; then
