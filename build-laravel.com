@@ -201,7 +201,7 @@ update_docs()
     for version in "${DOC_VERSIONS[@]}"; do
         path="resources/docs/$version"
         if ! [[ -d "$path" ]]; then
-            git clone git://github.com/laravel/docs.git --single-branch --branch="$version" "$path"
+            git clone https://github.com/laravel/docs.git --single-branch --branch="$version" "$path"
         else
             git -C "$path" reset --hard -q
             git -C "$path" clean -dfx -q
@@ -222,7 +222,7 @@ build_api()
     cd "$doctum"
 
     if ! [[ -d laravel ]]; then
-        git clone git://github.com/laravel/framework.git laravel
+        git clone https://github.com/laravel/framework.git laravel
     else
         git -C laravel reset --hard -q
         git -C laravel clean -dfx
