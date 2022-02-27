@@ -240,9 +240,9 @@ build_api()
 
     if [[ "$(php -r "echo PHP_MAJOR_VERSION;")" -ge "8" ]]; then
         # composer require code-lts/doctum:dev-main
-        composer install -o
+        composer install
     else
-        composer update -o
+        composer update
     fi
     exit_if_error
     git checkout composer.json || true
