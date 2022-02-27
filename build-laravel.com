@@ -142,7 +142,7 @@ update_app()
     exit_if_error
 
     if ! [[ -f ".env" ]]; then
-        echo "APP_KEY=" > .env
+        cp .env.example .env
         php artisan config:clear -q
         php artisan key:generate
         exit_if_error
