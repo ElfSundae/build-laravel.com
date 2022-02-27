@@ -32,7 +32,7 @@ jobs:
       - run: bash build-laravel.com laravel.com skip-docs
       - run: bash build-laravel.com laravel.com skip-api
       - run: bash build-laravel.com laravel.com skip-api local-cdn china-cdn remove-ga remove-ads --gaid=UA-123456-7
-      - run: bash build-laravel.com laravel.com cache --root-url="http://example.com"
+      - run: bash build-laravel.com laravel.com skip-docs skip-api cache --root-url="http://example.com"
       - run: bash build-laravel.com laravel.com clean
       - run: bash build-laravel.com upgrade
 
