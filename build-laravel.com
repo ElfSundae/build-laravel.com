@@ -138,7 +138,7 @@ update_app()
 
     echo "Installing PHP packages..."
     rm -rf bootstrap/cache/*
-    composer install --no-dev -o --no-interaction -q
+    composer install -o --no-dev --no-interaction -q
     exit_if_error
 
     if ! [[ -f ".env" ]]; then
