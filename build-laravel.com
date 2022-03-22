@@ -66,7 +66,7 @@ fullpath()
 clean_repo()
 {
     if [[ -d "$ROOT" ]]; then
-        git -C "$ROOT" clean -dfx -e "/.env"
+        git -C "$ROOT" clean -dffx -e "/.env"
     fi
 }
 
