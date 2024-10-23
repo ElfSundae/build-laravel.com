@@ -1,7 +1,7 @@
 #!/bin/sh
 
-VER="1.17.1"
-DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 5.6 5.7 5.8 6.x 7.x 8.x 9.x 10.x master)
+VER="1.17.2"
+DOC_VERSIONS=(4.2 5.0 5.1 5.2 5.3 5.4 5.5 5.6 5.7 5.8 6.x 7.x 8.x 9.x 10.x 11.x master)
 
 usage()
 {
